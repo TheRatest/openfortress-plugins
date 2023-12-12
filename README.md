@@ -26,6 +26,7 @@ Fun (hopefully) gamemode that forces people to use the weapon you kill them with
 of_weapontag_enabled (def. 0) "Enable the gamemode that forces people to use the weapon you kill them with"
 of_weapontag_frags (def. 1) "Amount of frags required to untag someone after they've been tagged"
 of_weapontag_can_tag_while_tagged (def. 0) "Amount of frags required to untag someone after they've been tagged"
+of_weapontag_stripweapons (def. 0) "Remove other weapons on spawn if tagged"
 of_weapontag_debug (def. 0) "An extra option to clutter up the server console (print useless stuff)"
 ```
 Associated server tag: "weapontag"
