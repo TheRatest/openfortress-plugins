@@ -37,6 +37,6 @@ Associated server tag: "weapontag"
 ## Installation
 1. Compile the plugins using a SourcePawn compiler (there should be one or more in /addons/sourcemod/scripting)
   OR
-1. Download the compiled plugins from releases
+1. Download the compiled plugins from one of the releases (doesn't need to be the latest one, it's just that they have more features & bugfixes)
 3. Put them in your server plugins folder (/addons/sourcemod/plugins)
 4. Verify that they're loaded on the server using "sm plugins list"
