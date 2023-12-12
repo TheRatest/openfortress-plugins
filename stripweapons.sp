@@ -11,7 +11,7 @@ public Plugin myinfo = {
 	author = "ratest",
 	description = "Removes all weapons from a player when they spawn",
 	version = "1.1",
-	url = ""
+	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
 public void OnPluginStart() {

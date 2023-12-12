@@ -18,7 +18,7 @@ public Plugin myinfo = {
 	author = "ratest",
 	description = "Fun (hopefully) gamemode that forces people to use the weapon you kill them with.",
 	version = "1.0",
-	url = ""
+	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
 public void OnPluginStart() {

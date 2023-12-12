@@ -10,7 +10,7 @@ public Plugin myinfo = {
 	author = "ratest",
 	description = "Modify the rocket projectile speed",
 	version = "1.0",
-	url = ""
+	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
 public void OnPluginStart() {
