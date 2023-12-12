@@ -4,6 +4,7 @@
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 ## StripWeapons (1.1)
 Removes all weapons (or only the pistol) from a player when they spawn
+#### Removing all weapons will cause a player to have a model without animations (will cause t-posing)
 ```
 of_stripweapons (def. 0) "Remove all weapons from a player when they spawn"
 of_strippistol (def. 0) "Remove the pistol from a player when they spawn"
