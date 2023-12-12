@@ -1,7 +1,7 @@
 
 # Open Fortress Plugins
 
-A collection of SourceMod plugins i made for Open Fortress dedicated servers running sourcemod (https://openfortress.fun)
+A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 ## StripWeapons (1.1)
 Removes all weapons (or only the pistol) from a player when they spawn
 ```
