@@ -6,8 +6,9 @@
 ConVar g_cvarWeaponTagEnabled = null;
 ConVar g_cvarWeaponTagFragsToUntag = null;
 ConVar g_cvarWeaponTagCanTagWhileTagged = null;
-//ConVar g_cvarWeaponTagUntagMode = null;
 ConVar g_cvarWeaponTagDebug = null;
+ConVar g_cvarWeaponTagStrip = null;
+//ConVar g_cvarWeaponTagUntagMode = null;
 
 bool taggedPlayers[MAXPLAYERS];
 int taggedFragsPlayers[MAXPLAYERS];
@@ -17,7 +18,7 @@ public Plugin myinfo = {
 	name = "Weapon Tag",
 	author = "ratest",
 	description = "Fun (hopefully) gamemode that forces people to use the weapon you kill them with.",
-	version = "1.0",
+	version = "1.2",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -27,8 +28,14 @@ public void OnPluginStart() {
 	g_cvarWeaponTagEnabled = CreateConVar("of_weapontag_enabled", "0", "Enable the gamemode that forces people to use the weapon you kill them with");
 	g_cvarWeaponTagFragsToUntag = CreateConVar("of_weapontag_frags", "1", "Amount of frags required to untag someone after they've been tagged");
 	g_cvarWeaponTagCanTagWhileTagged = CreateConVar("of_weapontag_can_tag_while_tagged", "0", "Amount of frags required to untag someone after they've been tagged");
-	//g_cvarWeaponTagUntagMode = CreateConVar("of_weapontag_untag_mode", "1", "How to untag someone\n	1 - Allow all other weapons\n	2 - Give them a new random weapon and force them to use that weapon only");
 	g_cvarWeaponTagDebug = CreateConVar("of_weapontag_debug", "0", "An extra option to clutter up the server console");
+	g_cvarWeaponTagStrip = CreateConVar("of_weapontag_stripweapons", "0", "Remove other weapons on spawn if tagged");
+	
+	// for server tags
+	g_cvarWeaponTagEnabled.AddChangeHook(Event_ChangeWeaponTagEnabled);
+	
+	// Currently not used anywhere, maybe i'll implement it at some point
+	// g_cvarWeaponTagUntagMode = CreateConVar("of_weapontag_untag_mode", "1", "How to untag someone\n	1 - Allow all other weapons\n	2 - Give them a new random weapon and force them to use that weapon only");
 
 	AutoExecConfig(true, "weapontag");
 	HookEvent("player_death", Event_PlayerDeath);
@@ -59,12 +66,17 @@ public void OnClientPutInServer(int iClient) {
 public void OF_OnPlayerSpawned(int iClient) {
 	bool bWeaponTagEnabled = GetConVarBool(g_cvarWeaponTagEnabled);
 	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
+	bool bStrip = GetConVarBool(g_cvarWeaponTagStrip);
 	
 	if(!bWeaponTagEnabled) {
 		return;
 	}
 	
 	if(taggedPlayers[iClient]) {
+		if(bStrip) {
+			TF2_RemoveAllWeapons(iClient);
+		}
+		
 		int iEntity = GivePlayerItem(iClient, taggedPlayersWeapons[iClient]);
 		if(iEntity == -1 || iClient == -1) {
 			if(bDebug) {
@@ -207,4 +219,88 @@ public void UntagPlayer(int iClient) {
 	taggedFragsPlayers[iClient] = 0;
 	taggedPlayers[iClient] = false;
 	taggedPlayersWeapons[iClient] = "";
+}
+
+void AddServerTagRat(char[] strTag) {
+	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
+	if(bDebug) {
+		PrintToServer("Changing server tags...");
+	}
+	ConVar cvarTags = FindConVar("sv_tags");
+	char strServTags[128];
+	GetConVarString(cvarTags, strServTags, 128);
+	
+	if(bDebug) {
+		PrintToServer("Prev: %s", strServTags);
+	}
+	
+	int iServTagsLen = strlen(strServTags);
+	int iTagLen = strlen(strTag);
+	
+	bool bFoundTag = StrContains(strServTags, strTag, false) != -1;
+	if(bFoundTag) {
+		if(bDebug) {
+			PrintToServer("Already found the server tag while adding it");
+		}
+		return;
+	}
+	
+	// not enough space in sv_tags for the tag
+	// +1 because of the comma needed for tag seperation
+	if(iServTagsLen + iTagLen+1 > 127) {
+		if(bDebug) {
+			PrintToServer("Tag too long");
+		}
+		return;
+	}
+	
+	strServTags[iServTagsLen] = ',';
+	strcopy(strServTags[iServTagsLen + 1], 64, strTag);
+	
+	if(bDebug) {
+		PrintToServer("New: %s", strServTags);
+	}
+	
+	SetConVarString(cvarTags, strServTags, false, false);
+}
+
+void RemoveServerTagRat(char[] strTag) {
+	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
+	if(bDebug) {
+		PrintToServer("Changing server tags...");
+	}
+	ConVar cvarTags = FindConVar("sv_tags");
+	char strServTags[128];
+	GetConVarString(cvarTags, strServTags, 128);
+	
+	if(bDebug) {
+		PrintToServer("Prev: %s", strServTags);
+	}
+	
+	int iServTagsLen = strlen(strServTags);
+	int iTagLen = strlen(strTag);
+	
+	bool bFoundTag = StrContains(strServTags, strTag, false) != -1;
+	if(!bFoundTag) {
+		if(bDebug) {
+			PrintToServer("Haven't found the server tag to remove");
+		}
+		return;
+	}
+	
+	strServTags[iServTagsLen - iTagLen] = '\0';
+	
+	SetConVarString(cvarTags, strServTags, false, false);
+}
+
+public void Event_ChangeWeaponTagEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
+	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
+	if(bDebug) {
+		PrintToServer("Changed weapontag state");
+	}
+	if(GetConVarBool(cvar)) {
+		AddServerTagRat("weapontag");
+	} else {
+		RemoveServerTagRat("weapontag");
+	}
 }

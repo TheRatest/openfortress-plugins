@@ -9,7 +9,7 @@ public Plugin myinfo = {
 	name = "Modifiable Rocket Speed",
 	author = "ratest",
 	description = "Modify the rocket projectile speed",
-	version = "1.0",
+	version = "1.1",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -17,6 +17,9 @@ public void OnPluginStart() {
 	LoadTranslations("common.phrases.txt");
 	
 	g_cvarRocketSpeed = CreateConVar("of_rocketspeed", "1", "Rocket projectile speed multiplier");
+	
+	// server tags
+	g_cvarRocketSpeed.AddChangeHook(Event_ChangePluginEnabled);
 
 	AutoExecConfig(true, "rocketspeed");
 }
@@ -55,4 +58,55 @@ public Action ModSpeed(Handle timer, int iRocket) {
 	}
 	
 	return Plugin_Continue;
+}
+
+void AddServerTagRat(char[] strTag) {
+	ConVar cvarTags = FindConVar("sv_tags");
+	char strServTags[128];
+	GetConVarString(cvarTags, strServTags, 128);
+	
+	int iServTagsLen = strlen(strServTags);
+	int iTagLen = strlen(strTag);
+	
+	bool bFoundTag = StrContains(strServTags, strTag, false) != -1;
+	if(bFoundTag) {
+		return;
+	}
+	
+	// not enough space in sv_tags for the tag
+	// +1 because of the comma needed for tag seperation
+	if(iServTagsLen + iTagLen+1 > 127) {
+		return;
+	}
+	
+	strServTags[iServTagsLen] = ',';
+	strcopy(strServTags[iServTagsLen + 1], 64, strTag);
+	
+	SetConVarString(cvarTags, strServTags, false, false);
+}
+
+void RemoveServerTagRat(char[] strTag) {
+	ConVar cvarTags = FindConVar("sv_tags");
+	char strServTags[128];
+	GetConVarString(cvarTags, strServTags, 128);
+	
+	int iServTagsLen = strlen(strServTags);
+	int iTagLen = strlen(strTag);
+	
+	bool bFoundTag = StrContains(strServTags, strTag, false) != -1;
+	if(!bFoundTag) {
+		return;
+	}
+	
+	strServTags[iServTagsLen - iTagLen] = '\0';
+	
+	SetConVarString(cvarTags, strServTags, false, false);
+}
+
+public void Event_ChangePluginEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
+	if(GetConVarBool(cvar)) {
+		AddServerTagRat("rocketspeed");
+	} else {
+		RemoveServerTagRat("rocketspeed");
+	}
 }
