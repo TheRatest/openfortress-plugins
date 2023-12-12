@@ -261,7 +261,10 @@ void AddServerTagRat(char[] strTag) {
 		PrintToServer("New: %s", strServTags);
 	}
 	
+	int iFlags = GetConVarFlags(cvarTags)
+	SetConVarFlags(cvarTags, iFlags & ~FCVAR_NOTIFY);
 	SetConVarString(cvarTags, strServTags, false, false);
+	SetConVarFlags(cvarTags, iFlags);
 }
 
 void RemoveServerTagRat(char[] strTag) {
@@ -288,9 +291,13 @@ void RemoveServerTagRat(char[] strTag) {
 		return;
 	}
 	
-	strServTags[iServTagsLen - iTagLen] = '\0';
+	ReplaceString(strServTags, 128, strTag, "", false);
+	ReplaceString(strServTags, 128, ",,", ",", false);
 	
+	int iFlags = GetConVarFlags(cvarTags)
+	SetConVarFlags(cvarTags, iFlags & ~FCVAR_NOTIFY);
 	SetConVarString(cvarTags, strServTags, false, false);
+	SetConVarFlags(cvarTags, iFlags);
 }
 
 public void Event_ChangeWeaponTagEnabled(ConVar cvar, char[] strPrev, char[] strNew) {

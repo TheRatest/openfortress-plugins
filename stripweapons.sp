@@ -21,7 +21,7 @@ public void OnPluginStart() {
 	g_cvarStripPistol = CreateConVar("of_strippistol", "0", "Remove the pistol from a player when they spawn");
 	
 	// server tags
-	g_cvarStripWeapons.AddChangeHook(Event_ChangePluginEnabled);
+	g_cvarStripWeapons.AddChangeHook(Event_ChangeStripWeaponsEnabled);
 
 	AutoExecConfig(true, "stripweapons");
 }
@@ -65,7 +65,10 @@ void AddServerTagRat(char[] strTag) {
 	strServTags[iServTagsLen] = ',';
 	strcopy(strServTags[iServTagsLen + 1], 64, strTag);
 	
+	int iFlags = GetConVarFlags(cvarTags)
+	SetConVarFlags(cvarTags, iFlags & ~FCVAR_NOTIFY);
 	SetConVarString(cvarTags, strServTags, false, false);
+	SetConVarFlags(cvarTags, iFlags);
 }
 
 void RemoveServerTagRat(char[] strTag) {
@@ -81,12 +84,16 @@ void RemoveServerTagRat(char[] strTag) {
 		return;
 	}
 	
-	strServTags[iServTagsLen - iTagLen] = '\0';
+	ReplaceString(strServTags, 128, strTag, "", false);
+	ReplaceString(strServTags, 128, ",,", ",", false);
 	
+	int iFlags = GetConVarFlags(cvarTags)
+	SetConVarFlags(cvarTags, iFlags & ~FCVAR_NOTIFY);
 	SetConVarString(cvarTags, strServTags, false, false);
+	SetConVarFlags(cvarTags, iFlags);
 }
 
-public void Event_ChangePluginEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
+public void Event_ChangeStripWeaponsEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
 	if(GetConVarBool(cvar)) {
 		AddServerTagRat("stripweapons");
 	} else {

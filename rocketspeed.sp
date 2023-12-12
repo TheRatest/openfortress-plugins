@@ -82,7 +82,10 @@ void AddServerTagRat(char[] strTag) {
 	strServTags[iServTagsLen] = ',';
 	strcopy(strServTags[iServTagsLen + 1], 64, strTag);
 	
+	int iFlags = GetConVarFlags(cvarTags)
+	SetConVarFlags(cvarTags, iFlags & ~FCVAR_NOTIFY);
 	SetConVarString(cvarTags, strServTags, false, false);
+	SetConVarFlags(cvarTags, iFlags);
 }
 
 void RemoveServerTagRat(char[] strTag) {
@@ -93,18 +96,22 @@ void RemoveServerTagRat(char[] strTag) {
 	int iServTagsLen = strlen(strServTags);
 	int iTagLen = strlen(strTag);
 	
-	bool bFoundTag = StrContains(strServTags, strTag, false) != -1;
-	if(!bFoundTag) {
+	int iFoundTagAt = StrContains(strServTags, strTag, false);
+	if(iFoundTagAt == -1) {
 		return;
 	}
 	
-	strServTags[iServTagsLen - iTagLen] = '\0';
+	ReplaceString(strServTags, 128, strTag, "", false);
+	ReplaceString(strServTags, 128, ",,", ",", false);
 	
+	int iFlags = GetConVarFlags(cvarTags)
+	SetConVarFlags(cvarTags, iFlags & ~FCVAR_NOTIFY);
 	SetConVarString(cvarTags, strServTags, false, false);
+	SetConVarFlags(cvarTags, iFlags);
 }
 
 public void Event_ChangePluginEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
-	if(GetConVarFloat(cvar) == 1.0) {
+	if(GetConVarFloat(cvar) != 1.0) {
 		AddServerTagRat("rocketspeed");
 	} else {
 		RemoveServerTagRat("rocketspeed");
