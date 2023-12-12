@@ -104,7 +104,7 @@ void RemoveServerTagRat(char[] strTag) {
 }
 
 public void Event_ChangePluginEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
-	if(GetConVarBool(cvar)) {
+	if(GetConVarFloat(cvar) == 1.0) {
 		AddServerTagRat("rocketspeed");
 	} else {
 		RemoveServerTagRat("rocketspeed");
