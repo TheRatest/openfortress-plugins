@@ -8,6 +8,9 @@ ConVar g_cvarWeaponTagFragsToUntag = null;
 ConVar g_cvarWeaponTagCanTagWhileTagged = null;
 ConVar g_cvarWeaponTagDebug = null;
 ConVar g_cvarWeaponTagStrip = null;
+ConVar g_cvarWeaponTagRefreshWeapon = null;
+ConVar g_cvarWeaponTagColor = null;
+ConVar g_cvarWeaponTagServerTag = null;
 //ConVar g_cvarWeaponTagUntagMode = null;
 
 bool taggedPlayers[MAXPLAYERS];
@@ -18,7 +21,7 @@ public Plugin myinfo = {
 	name = "Weapon Tag",
 	author = "ratest",
 	description = "Fun (hopefully) gamemode that forces people to use the weapon you kill them with.",
-	version = "1.2",
+	version = "1.3",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -30,9 +33,13 @@ public void OnPluginStart() {
 	g_cvarWeaponTagCanTagWhileTagged = CreateConVar("of_weapontag_can_tag_while_tagged", "0", "Amount of frags required to untag someone after they've been tagged");
 	g_cvarWeaponTagDebug = CreateConVar("of_weapontag_debug", "0", "An extra option to clutter up the server console");
 	g_cvarWeaponTagStrip = CreateConVar("of_weapontag_stripweapons", "0", "Remove other weapons on spawn if tagged");
+	g_cvarWeaponTagRefreshWeapon = CreateConVar("of_weapontag_refresh_weapon", "1", "If someone that's already tagged dies again, their forced weapon gets updated to the one they were killed with");
+	g_cvarWeaponTagColor = CreateConVar("of_weapontag_color", "0", "Change a tagged player's color");
+	g_cvarWeaponTagServerTag = CreateConVar("of_weapontag_servertag", "0", "Apply a 'weapontag' tag to the server?");
 	
 	// for server tags
 	g_cvarWeaponTagEnabled.AddChangeHook(Event_ChangeWeaponTagEnabled);
+	g_cvarWeaponTagEnabled.AddChangeHook(Event_ChangeServerTagsEnabled);
 	
 	// Currently not used anywhere, maybe i'll implement it at some point
 	// g_cvarWeaponTagUntagMode = CreateConVar("of_weapontag_untag_mode", "1", "How to untag someone\n	1 - Allow all other weapons\n	2 - Give them a new random weapon and force them to use that weapon only");
@@ -67,6 +74,7 @@ public void OF_OnPlayerSpawned(int iClient) {
 	bool bWeaponTagEnabled = GetConVarBool(g_cvarWeaponTagEnabled);
 	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
 	bool bStrip = GetConVarBool(g_cvarWeaponTagStrip);
+	bool bColor = GetConVarBool(g_cvarWeaponTagColor);
 	
 	if(!bWeaponTagEnabled) {
 		return;
@@ -87,6 +95,10 @@ public void OF_OnPlayerSpawned(int iClient) {
 		AcceptEntityInput(iEntity, "use", iClient, iClient);
 		
 		SetEntPropEnt(iClient, Prop_Send, "m_hActiveWeapon", iEntity);
+		
+		if(bColor) {
+			SetEntityRenderColor(iClient, 200, 200, 255, 230);
+		}
 		
 		if(bDebug) {
 			PrintToServer("Giving client %i a %s", iClient, taggedPlayersWeapons[iClient]);
@@ -174,6 +186,7 @@ public void Event_PlayerDeath(Event event, const char[] evName, bool dontBroadca
 	
 	bool bWeaponTagEnabled = GetConVarBool(g_cvarWeaponTagEnabled);
 	bool bWeaponTagCanTagWhileTagged = GetConVarBool(g_cvarWeaponTagCanTagWhileTagged);
+	bool bRefreshWeapon = GetConVarBool(g_cvarWeaponTagRefreshWeapon);
 	
 	if(!bWeaponTagEnabled) {
 		if(bDebug) {
@@ -192,6 +205,13 @@ public void Event_PlayerDeath(Event event, const char[] evName, bool dontBroadca
 				PrintToServer("Tagged client %i", iVictim);
 			}
 		}
+	} else {
+		if(bRefreshWeapon) {
+			RefreshWeapon(iVictim, iAttacker);
+			if(bDebug) {
+				PrintToServer("Refreshing %i's weapon", iVictim);
+			}
+		}
 	}
 	
 	if(taggedPlayers[iAttacker]) {
@@ -208,6 +228,10 @@ public void Event_PlayerDeath(Event event, const char[] evName, bool dontBroadca
 public void TagPlayer(int iClient, int iAttacker) {
 	taggedPlayers[iClient] = true;
 	taggedFragsPlayers[iClient] = GetConVarInt(g_cvarWeaponTagFragsToUntag);
+	RefreshWeapon(iClient, iAttacker);
+}
+
+public void RefreshWeapon(int iClient, int iAttacker) {
 	if(iAttacker != 0) {
 		GetClientWeapon(iAttacker, taggedPlayersWeapons[iClient], 64);
 	} else {
@@ -219,6 +243,11 @@ public void UntagPlayer(int iClient) {
 	taggedFragsPlayers[iClient] = 0;
 	taggedPlayers[iClient] = false;
 	taggedPlayersWeapons[iClient] = "";
+	
+	bool bColor = GetConVarBool(g_cvarWeaponTagColor);
+	if (bColor) {
+		SetEntityRenderColor(iClient, 255, 255, 255, 255);
+	}
 }
 
 void AddServerTagRat(char[] strTag) {
@@ -302,11 +331,30 @@ void RemoveServerTagRat(char[] strTag) {
 
 public void Event_ChangeWeaponTagEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
 	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
+	bool bTagsEnabled = GetConVarBool(g_cvarWeaponTagServerTag);
 	if(bDebug) {
 		PrintToServer("Changed weapontag state");
 	}
-	if(GetConVarBool(cvar)) {
-		AddServerTagRat("weapontag");
+	if(bTagsEnabled) {
+		if(GetConVarBool(cvar)) {
+			AddServerTagRat("weapontag");
+		} else {
+			RemoveServerTagRat("weapontag");
+		}
+	}
+}
+
+public void Event_ChangeServerTagsEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
+	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
+	bool bTagsEnabled = GetConVarBool(g_cvarWeaponTagServerTag);
+	bool bWeptagEnabled = GetConVarBool(g_cvarWeaponTagEnabled);
+	if(bDebug) {
+		PrintToServer("Changing server tags state");
+	}
+	if(bTagsEnabled) {
+		if(bWeptagEnabled) {
+			AddServerTagRat("weapontag");
+		}
 	} else {
 		RemoveServerTagRat("weapontag");
 	}
