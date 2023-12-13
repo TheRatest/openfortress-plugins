@@ -35,6 +35,12 @@ of_rocketspeed (def. 1) "Rocket projectile speed multiplier"
 ```
 Associated server tag: "rocketspeed"
 
+## Entity Classname Logger (1.0)
+Prints out a list of all current entities
+```
+sm_printentities "Print out all entity classnames to the server console"
+```
+
 ## Installation
 1. Compile the plugins using a SourcePawn compiler (there should be one or more in /addons/sourcemod/scripting)
   OR
