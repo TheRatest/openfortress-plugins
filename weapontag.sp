@@ -35,8 +35,8 @@ public void OnPluginStart() {
 	g_cvarWeaponTagDebug = CreateConVar("of_weapontag_debug", "0", "An extra option to clutter up the server console");
 	g_cvarWeaponTagStrip = CreateConVar("of_weapontag_stripweapons", "1", "Remove other weapons on spawn if tagged");
 	g_cvarWeaponTagRefreshWeapon = CreateConVar("of_weapontag_refresh_weapon", "1", "If someone that's already tagged dies again, their forced weapon gets updated to the one they were killed with");
-	g_cvarWeaponTagDistort = CreateConVar("of_weapontag_distort", "0", "Change a tagged player's transparency");
-	g_cvarWeaponTagTintWeapon = CreateConVar("of_weapontag_tint_weapon", "0", "Change the tagged player's weapon color to red");
+	g_cvarWeaponTagDistort = CreateConVar("of_weapontag_distort", "1", "Change a tagged player's render fx to look a bit like a hologram");
+	g_cvarWeaponTagTintWeapon = CreateConVar("of_weapontag_tint_weapon", "1", "Change the tagged player's weapon color to red");
 	g_cvarWeaponTagServerTag = CreateConVar("of_weapontag_servertag", "1", "Apply a 'weapontag' tag to the server?");
 	
 	// for server tags
