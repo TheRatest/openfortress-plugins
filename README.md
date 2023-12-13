@@ -15,7 +15,7 @@ of_weapontag_can_tag_while_tagged (def. 0) "Amount of frags required to untag so
 of_weapontag_refresh_weapon (def. 1) "If someone that's already tagged dies again, their forced weapon gets updated to the one they were killed with"
 of_weapontag_stripweapons (def. 1) "Remove other weapons on spawn if tagged"
 of_weapontag_tint_weapon (def. 1) "Change the tagged player's weapon color to red"
-of_weapontag_distort (def. 0) "Change a tagged player's transparency"
+of_weapontag_distort (def. 1) "Change a tagged player's transparency"
 of_weapontag_servertag (def. 0) "Apply a 'weapontag' tag to the server?"
 of_weapontag_debug (def. 0) "An extra option to clutter up the server console (print useless stuff)"
 ```
