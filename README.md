@@ -2,6 +2,22 @@
 # Open Fortress Plugins
 
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
+
+## WeaponTag (1.35)
+Fun (hopefully) gamemode that forces people to use the weapon you kill them with.
+(e.g. if someone kills you with a rocket launcher you'll be forced to use only the rocket launcher until you frag someone)
+```
+of_weapontag_enabled (def. 0) "Enable the gamemode that forces people to use the weapon you kill them with"
+of_weapontag_frags (def. 1) "Amount of frags required to untag someone after they've been tagged"
+of_weapontag_can_tag_while_tagged (def. 0) "Amount of frags required to untag someone after they've been tagged"
+of_weapontag_refresh_weapon (def. 1) "If someone that's already tagged dies again, their forced weapon gets updated to the one they were killed with"
+of_weapontag_stripweapons (def. 0) "Remove other weapons on spawn if tagged"
+of_weapontag_distort (def. 0) "Change a tagged player's transparency"
+of_weapontag_servertag (def. 0) "Apply a 'weapontag' tag to the server?"
+of_weapontag_debug (def. 0) "An extra option to clutter up the server console (print useless stuff)"
+```
+Associated server tag: "weapontag"
+
 ## StripWeapons (1.2)
 Removes all weapons (or only the pistol) from a player when they spawn
 #### Removing all weapons will cause a player to have a model without animations (will cause t-posing)
@@ -18,21 +34,6 @@ Modify the rocket projectile speed
 of_rocketspeed (def. 1) "Rocket projectile speed multiplier"
 ```
 Associated server tag: "rocketspeed"
-
-## WeaponTag (1.3)
-Fun (hopefully) gamemode that forces people to use the weapon you kill them with.
-(e.g. if someone kills you with a rocket launcher you'll be forced to use only the rocket launcher until you frag someone)
-```
-of_weapontag_enabled (def. 0) "Enable the gamemode that forces people to use the weapon you kill them with"
-of_weapontag_frags (def. 1) "Amount of frags required to untag someone after they've been tagged"
-of_weapontag_can_tag_while_tagged (def. 0) "Amount of frags required to untag someone after they've been tagged"
-of_weapontag_refresh_weapon (def. 1) "If someone that's already tagged dies again, their forced weapon gets updated to the one they were killed with"
-of_weapontag_stripweapons (def. 0) "Remove other weapons on spawn if tagged"
-of_weapontag_color (def. 0) "Change a tagged player's color"
-of_weapontag_servertag (def. 0) "Apply a 'weapontag' tag to the server?"
-of_weapontag_debug (def. 0) "An extra option to clutter up the server console (print useless stuff)"
-```
-Associated server tag: "weapontag"
 
 ## Installation
 1. Compile the plugins using a SourcePawn compiler (there should be one or more in /addons/sourcemod/scripting)
