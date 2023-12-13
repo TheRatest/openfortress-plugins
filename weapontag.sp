@@ -11,6 +11,7 @@ ConVar g_cvarWeaponTagStrip = null;
 ConVar g_cvarWeaponTagRefreshWeapon = null;
 ConVar g_cvarWeaponTagDistort = null;
 ConVar g_cvarWeaponTagServerTag = null;
+ConVar g_cvarWeaponTagTintWeapon = null;
 //ConVar g_cvarWeaponTagUntagMode = null;
 
 bool taggedPlayers[MAXPLAYERS];
@@ -21,7 +22,7 @@ public Plugin myinfo = {
 	name = "Weapon Tag",
 	author = "ratest",
 	description = "Fun (hopefully) gamemode that forces people to use the weapon you kill them with.",
-	version = "1.35",
+	version = "1.4",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -35,6 +36,7 @@ public void OnPluginStart() {
 	g_cvarWeaponTagStrip = CreateConVar("of_weapontag_stripweapons", "1", "Remove other weapons on spawn if tagged");
 	g_cvarWeaponTagRefreshWeapon = CreateConVar("of_weapontag_refresh_weapon", "1", "If someone that's already tagged dies again, their forced weapon gets updated to the one they were killed with");
 	g_cvarWeaponTagDistort = CreateConVar("of_weapontag_distort", "0", "Change a tagged player's transparency");
+	g_cvarWeaponTagTintWeapon = CreateConVar("of_weapontag_tint_weapon", "0", "Change the tagged player's weapon color to red");
 	g_cvarWeaponTagServerTag = CreateConVar("of_weapontag_servertag", "1", "Apply a 'weapontag' tag to the server?");
 	
 	// for server tags
@@ -74,7 +76,8 @@ public void OF_OnPlayerSpawned(int iClient) {
 	bool bWeaponTagEnabled = GetConVarBool(g_cvarWeaponTagEnabled);
 	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
 	bool bStrip = GetConVarBool(g_cvarWeaponTagStrip);
-	bool bColor = GetConVarBool(g_cvarWeaponTagDistort);
+	bool bDistortPlayer = GetConVarBool(g_cvarWeaponTagDistort);
+	bool bTintWeapon = GetConVarBool(g_cvarWeaponTagTintWeapon);
 	
 	if(!bWeaponTagEnabled) {
 		return;
@@ -96,11 +99,15 @@ public void OF_OnPlayerSpawned(int iClient) {
 		
 		SetEntPropEnt(iClient, Prop_Send, "m_hActiveWeapon", iEntity);
 		
-		if(bColor) {
+		if(bDistortPlayer) {
 			if(bDebug) {
 				PrintToServer("Creating color timers for client %i", iClient);	
 			}
 			SetEntityRenderFx(iClient, RENDERFX_DISTORT);
+		}
+		
+		if(bTintWeapon) {
+			CreateTimer(0.5, ColorWeaponDelayed, iClient);
 		}
 		
 		if(bDebug) {
@@ -109,17 +116,41 @@ public void OF_OnPlayerSpawned(int iClient) {
 	}
 }
 
-/*Action ColorPlayerDelayed(Handle hTimer, int iClient) {
+Action ColorWeaponDelayed(Handle hTimer, int iClient) {
 	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
 	
-	SetEntityRenderFx(iClient, RENDERFX_DISTORT);
+	int iWeapon = -1;
+	char strClassname[128];
+	for(int i = 0; i < 2048; ++i) {
+		if(!IsValidEdict(i) || !IsValidEntity(i)) {
+			continue;
+		}
+		if(!HasEntProp(i, Prop_Send, "m_hOwnerEntity")) {
+			continue;
+		}
+		GetEdictClassname(i, strClassname, 128);
+		if(GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity") == iClient && StrEqual(strClassname, taggedPlayersWeapons[iClient], false)) {
+			iWeapon = i;
+			break;
+		}
+	}
+	
+	if(iWeapon == -1) {
+		if(bDebug) {
+			PrintToServer("Couldn't find client %i's weapon", iClient);
+		}
+		return Plugin_Continue;
+	}
+	
+	SetEntityRenderMode(iWeapon, RENDER_TRANSCOLOR);
+	SetEntityRenderColor(iWeapon, 255, 63, 63, 255);
 	
 	if(bDebug) {
-		PrintToServer("Colored client %i", iClient);
+		PrintToServer("Colored client %i's weapon", iClient);
 	}
 	
 	return Plugin_Continue;
-}*/
+}
 
 Action Event_WeaponSwitch(int iClient, int iWeapon) {
 	if(!taggedPlayers[iClient] || iWeapon < 0) {
@@ -247,18 +278,42 @@ void RefreshWeapon(int iClient, int iAttacker) {
 }
 
 void UntagPlayer(int iClient) {
+	char strForcedWeaponClassname[128];
 	taggedFragsPlayers[iClient] = 0;
 	taggedPlayers[iClient] = false;
+	strcopy(strForcedWeaponClassname, 128, taggedPlayersWeapons[iClient]);
 	taggedPlayersWeapons[iClient] = "";
 
 	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
-	bool bColor = GetConVarBool(g_cvarWeaponTagDistort);
-	if (bColor) {
+	bool bDistortPlayer = GetConVarBool(g_cvarWeaponTagDistort);
+	
+	if (bDistortPlayer) {
 		SetEntityRenderFx(iClient, RENDERFX_NONE);
 	}
-
-	if(bDebug) {
-		PrintToServer("Changing server tags...");
+	
+	int iWeapon = -1;
+	for(int i = 0; i < 2048; ++i) {
+		if(!IsValidEdict(i) || !IsValidEntity(i)) {
+			continue;
+		}
+		if(!HasEntProp(i, Prop_Send, "m_hOwnerEntity")) {
+			continue;
+		}
+		char strClassname[128];
+		GetEdictClassname(i, strClassname, 128);
+		if(GetEntPropEnt(i, Prop_Send, "m_hOwnerEntity") == iClient && StrEqual(strClassname, strForcedWeaponClassname, false)) {
+			SetEntityRenderMode(i, RENDER_TRANSCOLOR);
+			SetEntityRenderColor(i, 255, 255, 255, 255);
+			iWeapon = i;
+			break;
+		}
+	}
+	
+	if(iWeapon == -1) {
+		if(bDebug) {
+			PrintToServer("Couldn't find client %i's weapon to uncolor it", iClient);
+		}
+		return;
 	}
 }
 
