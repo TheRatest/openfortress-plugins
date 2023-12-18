@@ -19,6 +19,7 @@ Fun (hopefully) gamemode that forces people to use the weapon you kill them with
 | of_weapontag_distort              | Change a tagged player's render fx to look a bit like a hologram                                               | 1             | 0 or 1            | Isn't really that visible...        |
 | of_weapontag_servertag            | Apply a 'weapontag' tag to the server                                                                          | 1             | 0 or 1            | Do people even look at server tags? |
 | of_weapontag_debug                | An extra option to clutter up the server console (print useless stuff)                                         | 0             | 0 or 1            |                                     |
+
 Associated server tag: "weapontag"
 
 ## StripWeapons (1.2)
@@ -46,7 +47,7 @@ dm_gump 20
 dm_doomspire_alt2 15
 dm_crossfire 25
 ```
-
+Server commands:
 ```
 of_mapfraglimit_reload "Reload the 2nd config for this plugin" (Admin command)
 ```
@@ -56,10 +57,12 @@ Modify the rocket projectile speed
 | ConVar         | Description                        | Default Value | Acceptable Values | Notes                               |
 |----------------|------------------------------------|---------------|-------------------|-------------------------------------|
 | of_rocketspeed | Rocket projectile speed multiplier | 1             | 0-3               | Values higher than 3 cause problems |
+
 Associated server tag: "rocketspeed"
 
 ## Entity Classname Logger (1.0)
 Prints out a list of all current entities
+Server commands:
 ```
 sm_printentities "Print out all entity classnames to the server console"
 ```
