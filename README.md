@@ -28,6 +28,7 @@ Removes all weapons (or only the pistol) from a player when they spawn
 |-----------------|--------------------------------------------------|---------------|-------------------|-----------------|
 | of_stripweapons | Remove all weapons from a player when they spawn | 0             | 0 or 1            | Causes t-posing |
 | of_strippistol  | Remove the pistol from a player when they spawn  | 0             | 0 or 1            |                 |
+
 Associated server tag: "stripweapons"
 
 ## Map Dependent Frag Limit (1.0)
@@ -47,7 +48,7 @@ dm_gump 20
 dm_doomspire_alt2 15
 dm_crossfire 25
 ```
-Server commands:
+#### Server commands:
 ```
 of_mapfraglimit_reload "Reload the 2nd config for this plugin" (Admin command)
 ```
@@ -62,7 +63,7 @@ Associated server tag: "rocketspeed"
 
 ## Entity Classname Logger (1.0)
 Prints out a list of all current entities
-Server commands:
+#### Server commands:
 ```
 sm_printentities "Print out all entity classnames to the server console"
 ```
