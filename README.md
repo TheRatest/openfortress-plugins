@@ -53,6 +53,8 @@ dm_crossfire 25
 of_mapfraglimit_reload "Reload the 2nd config for this plugin" (Admin command)
 ```
 
+Associated server tag: "mapfraglimit"
+
 ## RocketSpeed (1.1)
 Modify the rocket projectile speed
 | ConVar         | Description                        | Default Value | Acceptable Values | Notes                               |
