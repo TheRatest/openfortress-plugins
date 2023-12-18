@@ -22,7 +22,7 @@ public Plugin myinfo = {
 	name = "Weapon Tag",
 	author = "ratest",
 	description = "Fun (hopefully) gamemode that forces people to use the weapon you kill them with.",
-	version = "1.4",
+	version = "1.41",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -31,12 +31,12 @@ public void OnPluginStart() {
 	
 	g_cvarWeaponTagEnabled = CreateConVar("of_weapontag_enabled", "0", "Enable the gamemode that forces people to use the weapon you kill them with");
 	g_cvarWeaponTagFragsToUntag = CreateConVar("of_weapontag_frags", "1", "Amount of frags required to untag someone after they've been tagged");
-	g_cvarWeaponTagCanTagWhileTagged = CreateConVar("of_weapontag_can_tag_while_tagged", "0", "Amount of frags required to untag someone after they've been tagged");
+	g_cvarWeaponTagCanTagWhileTagged = CreateConVar("of_weapontag_can_tag_while_tagged", "0", "Whether can tagged players tag other players");
 	g_cvarWeaponTagDebug = CreateConVar("of_weapontag_debug", "0", "An extra option to clutter up the server console");
 	g_cvarWeaponTagStrip = CreateConVar("of_weapontag_stripweapons", "1", "Remove other weapons on spawn if tagged");
 	g_cvarWeaponTagRefreshWeapon = CreateConVar("of_weapontag_refresh_weapon", "1", "If someone that's already tagged dies again, their forced weapon gets updated to the one they were killed with");
-	g_cvarWeaponTagDistort = CreateConVar("of_weapontag_distort", "0", "Change a tagged player's transparency");
-	g_cvarWeaponTagTintWeapon = CreateConVar("of_weapontag_tint_weapon", "0", "Change the tagged player's weapon color to red");
+	g_cvarWeaponTagDistort = CreateConVar("of_weapontag_distort", "1", "Change a tagged player's transparency");
+	g_cvarWeaponTagTintWeapon = CreateConVar("of_weapontag_tint_weapon", "1", "Change the tagged player's weapon color to red");
 	g_cvarWeaponTagServerTag = CreateConVar("of_weapontag_servertag", "1", "Apply a 'weapontag' tag to the server?");
 	
 	// for server tags
