@@ -3,7 +3,7 @@
 
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 
-## WeaponTag (1.41)
+## WeaponTag (1.5)
 Fun (hopefully) gamemode that forces people to use the weapon you kill them with.
 (e.g. if someone kills you with a rocket launcher you'll be forced to use only the rocket launcher until you frag someone)
 #### If you're tagged you won't have a weapon pullout animation on spawn
@@ -31,7 +31,7 @@ Removes all weapons (or only the pistol) from a player when they spawn
 
 Associated server tag: "stripweapons"
 
-## Map Dependent Frag Limit (1.0)
+## Map Dependent Frag Limit (1.1)
 Lets you assign a frag limit to a map
 | ConVar                         | Description                                           | Default Value                       | Acceptable Values     | Notes |
 |--------------------------------|-------------------------------------------------------|-------------------------------------|-----------------------|-------|
@@ -55,7 +55,7 @@ of_mapfraglimit_reload "Reload the 2nd config for this plugin" (Admin command)
 
 Associated server tag: "mapfraglimit"
 
-## RocketSpeed (1.1)
+## RocketSpeed (1.2)
 Modify the rocket projectile speed
 | ConVar         | Description                        | Default Value | Acceptable Values | Notes                               |
 |----------------|------------------------------------|---------------|-------------------|-------------------------------------|
@@ -73,5 +73,5 @@ sm_printentities "Print out all entity classnames to the server console"
 ## Installation
 1. Compile the plugins using a SourcePawn compiler (there should be one or more in /addons/sourcemod/scripting) ***OR*** Download the compiled plugins from one of the releases (doesn't need to be the latest one, it's just that they have more features & bugfixes)
 2. Put them in your server plugins folder (/addons/sourcemod/plugins)
-3. Download translations if needed (put in /addons/sourcemod/translations)
+3. Download the translations file (put in /addons/sourcemod/translations)
 4. Verify that they're loaded on the server using "sm plugins list"
