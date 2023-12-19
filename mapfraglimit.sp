@@ -53,6 +53,7 @@ Action Command_MapFragLimitReload(int iClient, int iArgs) {
 }
 
 void LoadMapFrags() {
+	g_bAnnounceDebounce = false;
 	g_iMapFragsCount = 0;
 	char szFilePath[256];
 	char szFullFilePath[512];
@@ -101,23 +102,29 @@ void ChangeMapFragLimit() {
 	for(int i = 0; i < g_iMapFragsCount; ++i) {
 		if(StrEqual(szMapName, g_szMapName[i])) {
 			SetConVarInt(cvarFragLimit, g_iMapFrags[i], true, false);
-			if(GetConVarBool(g_cvarMapFragLimitAnnounce) && !g_bAnnounceDebounce) {
-				g_bAnnounceDebounce = true;
-				CreateTimer(GetConVarFloat(g_cvarMapFragLimitAnnounceTime), FragLimitDelayedAnnounce, i);
-			}
+			CreateTimer(GetConVarFloat(g_cvarMapFragLimitAnnounceTime), FragLimitDelayedAnnounce, i);
 			break;
 		}
 	}
 }
 
 public Action FragLimitDelayedAnnounce(Handle hTimer, int iMapIndex) {
-	g_bAnnounceDebounce = false;
+	if(g_bAnnounceDebounce) {
+		return Plugin_Handled;
+	}
+	g_bAnnounceDebounce = true;
+	CreateTimer(15.0, DelayedDebounceDisable);
 	if(!GetConVarBool(g_cvarMapFragLimitAnnounce)) {
 		return Plugin_Handled;
 	}
 	
 	CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
 	
+	return Plugin_Handled;
+}
+
+public Action DelayedDebounceDisable(Handle hTimer) {
+	g_bAnnounceDebounce = false;
 	return Plugin_Handled;
 }
 

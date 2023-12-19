@@ -6,7 +6,7 @@
 	}
 	"Rat RocketSpeedChange"
 	{
-		"#format"		"{1:.0f}"
+		"#format"		"{1:f}"
 		"en"			"Rocket speed has been changed to {1}"
 	}
 	"Rat WeaponTagDisabled"
