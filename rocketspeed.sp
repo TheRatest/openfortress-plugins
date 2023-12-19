@@ -2,21 +2,24 @@
 #include <sdkhooks>
 #include <sdktools>
 #include <openfortress>
+#include <morecolors>
 
 ConVar g_cvarRocketSpeed = null;
+ConVar g_cvarRocketSpeedAnnounce = null;
 
 public Plugin myinfo = {
 	name = "Modifiable Rocket Speed",
 	author = "ratest",
 	description = "Modify the rocket projectile speed",
-	version = "1.1",
+	version = "1.2",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
 public void OnPluginStart() {
-	LoadTranslations("common.phrases.txt");
+	LoadTranslations("ratsplugins.phrases.txt");
 	
 	g_cvarRocketSpeed = CreateConVar("of_rocketspeed", "1", "Rocket projectile speed multiplier");
+	g_cvarRocketSpeedAnnounce = CreateConVar("of_rocketspeed_announce", "1", "Announce cvar changes");
 	
 	// server tags
 	g_cvarRocketSpeed.AddChangeHook(Event_ChangePluginEnabled);
@@ -93,9 +96,6 @@ void RemoveServerTagRat(char[] strTag) {
 	char strServTags[128];
 	GetConVarString(cvarTags, strServTags, 128);
 	
-	int iServTagsLen = strlen(strServTags);
-	int iTagLen = strlen(strTag);
-	
 	int iFoundTagAt = StrContains(strServTags, strTag, false);
 	if(iFoundTagAt == -1) {
 		return;
@@ -111,6 +111,12 @@ void RemoveServerTagRat(char[] strTag) {
 }
 
 public void Event_ChangePluginEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
+	if(StrEqual(strPrev, strNew)) {
+		return;
+	}
+	if(GetConVarBool(g_cvarRocketSpeedAnnounce)) {
+		CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat RocketSpeedChange", GetConVarFloat(cvar));
+	}
 	if(GetConVarFloat(cvar) != 1.0) {
 		AddServerTagRat("rocketspeed");
 	} else {

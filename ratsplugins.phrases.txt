@@ -1,0 +1,25 @@
+"Phrases"
+{
+	"Rat CommandPrefix"
+	{
+		"en"			"[SM]"
+	}
+	"Rat RocketSpeedChange"
+	{
+		"#format"		"{1:.0f}"
+		"en"			"Rocket speed has been changed to {1}"
+	}
+	"Rat WeaponTagDisabled"
+	{
+		"en"			"Weapon tag has been disabled"
+	}
+	"Rat WeaponTagEnabled"
+	{
+		"en"			"Weapon tag has been enabled"
+	}
+	"Rat FragLimitAnnounce"
+	{
+		"#format"		"{1:s},{2:i}"
+		"en"			"Frag limit for {1}: {2}"
+	}
+}

@@ -2,6 +2,7 @@
 #include <sdkhooks>
 #include <sdktools>
 #include <openfortress>
+#include <morecolors>
 
 ConVar g_cvarWeaponTagEnabled = null;
 ConVar g_cvarWeaponTagFragsToUntag = null;
@@ -22,12 +23,12 @@ public Plugin myinfo = {
 	name = "Weapon Tag",
 	author = "ratest",
 	description = "Fun (hopefully) gamemode that forces people to use the weapon you kill them with.",
-	version = "1.41",
+	version = "1.5",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
 public void OnPluginStart() {
-	LoadTranslations("common.phrases.txt");
+	LoadTranslations("ratsplugins.phrases.txt");
 	
 	g_cvarWeaponTagEnabled = CreateConVar("of_weapontag_enabled", "0", "Enable the gamemode that forces people to use the weapon you kill them with");
 	g_cvarWeaponTagFragsToUntag = CreateConVar("of_weapontag_frags", "1", "Amount of frags required to untag someone after they've been tagged");
@@ -35,7 +36,7 @@ public void OnPluginStart() {
 	g_cvarWeaponTagDebug = CreateConVar("of_weapontag_debug", "0", "An extra option to clutter up the server console");
 	g_cvarWeaponTagStrip = CreateConVar("of_weapontag_stripweapons", "1", "Remove other weapons on spawn if tagged");
 	g_cvarWeaponTagRefreshWeapon = CreateConVar("of_weapontag_refresh_weapon", "1", "If someone that's already tagged dies again, their forced weapon gets updated to the one they were killed with");
-	g_cvarWeaponTagDistort = CreateConVar("of_weapontag_distort", "1", "Change a tagged player's transparency");
+	g_cvarWeaponTagDistort = CreateConVar("of_weapontag_distort", "1", "Change a tagged player's render fx to look a bit like a hologram");
 	g_cvarWeaponTagTintWeapon = CreateConVar("of_weapontag_tint_weapon", "1", "Change the tagged player's weapon color to red");
 	g_cvarWeaponTagServerTag = CreateConVar("of_weapontag_servertag", "1", "Apply a 'weapontag' tag to the server?");
 	
@@ -399,14 +400,19 @@ void RemoveServerTagRat(char[] strTag) {
 void Event_ChangeWeaponTagEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
 	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
 	bool bTagsEnabled = GetConVarBool(g_cvarWeaponTagServerTag);
+	if(StrEqual(strPrev, strNew)) {
+		return;
+	}
 	if(bDebug) {
 		PrintToServer("Changed weapontag state");
 	}
 	if(bTagsEnabled) {
 		if(GetConVarBool(cvar)) {
 			AddServerTagRat("weapontag");
+			CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat WeaponTagEnabled");
 		} else {
 			RemoveServerTagRat("weapontag");
+			CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat WeaponTagDisabled");
 		}
 	}
 }
@@ -415,6 +421,9 @@ void Event_ChangeServerTagsEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
 	bool bDebug = GetConVarBool(g_cvarWeaponTagDebug);
 	bool bTagsEnabled = GetConVarBool(g_cvarWeaponTagServerTag);
 	bool bWeptagEnabled = GetConVarBool(g_cvarWeaponTagEnabled);
+	if(StrEqual(strPrev, strNew)) {
+		return;
+	}
 	if(bDebug) {
 		PrintToServer("Changing server tags state");
 	}

@@ -2,11 +2,14 @@
 #include <sdkhooks>
 #include <sdktools>
 #include <openfortress>
+#include <morecolors>
 
 ConVar g_cvarMapFragLimitEnabled = null;
 ConVar g_cvarMapFragLimitFilePath = null;
 ConVar g_cvarMapFragLimitAnnounce = null;
 ConVar g_cvarMapFragLimitAnnounceTime = null;
+
+bool g_bAnnounceDebounce = false;
 
 // turns out sourcepawn doesnt support structs :c
 /*typedef struct MapFrags {
@@ -23,11 +26,13 @@ public Plugin myinfo = {
 	name = "Map Dependent Frag Limit",
 	author = "ratest",
 	description = "Lets you assign a frag limit to a map",
-	version = "1.0",
+	version = "1.1",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
 public void OnPluginStart() {
+	LoadTranslations("ratsplugins.phrases.txt");
+	
 	g_cvarMapFragLimitEnabled = CreateConVar("of_mapfraglimit_enabled", "0", "Enable map dependent frag limit");
 	g_cvarMapFragLimitAnnounce = CreateConVar("of_mapfraglimit_announce", "1", "Announce the frag limit for the map in chat");
 	g_cvarMapFragLimitAnnounceTime = CreateConVar("of_mapfraglimit_announce_delay", "30", "How many seconds to wait before announcing the change");
@@ -96,7 +101,8 @@ void ChangeMapFragLimit() {
 	for(int i = 0; i < g_iMapFragsCount; ++i) {
 		if(StrEqual(szMapName, g_szMapName[i])) {
 			SetConVarInt(cvarFragLimit, g_iMapFrags[i], true, false);
-			if(GetConVarBool(g_cvarMapFragLimitAnnounce)) {
+			if(GetConVarBool(g_cvarMapFragLimitAnnounce) && !g_bAnnounceDebounce) {
+				g_bAnnounceDebounce = true;
 				CreateTimer(GetConVarFloat(g_cvarMapFragLimitAnnounceTime), FragLimitDelayedAnnounce, i);
 			}
 			break;
@@ -105,11 +111,12 @@ void ChangeMapFragLimit() {
 }
 
 public Action FragLimitDelayedAnnounce(Handle hTimer, int iMapIndex) {
+	g_bAnnounceDebounce = false;
 	if(!GetConVarBool(g_cvarMapFragLimitAnnounce)) {
 		return Plugin_Handled;
 	}
 	
-	PrintToChatAll("[SM] Frag limit for %s: %i", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
+	CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
 	
 	return Plugin_Handled;
 }
