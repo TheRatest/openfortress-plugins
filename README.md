@@ -3,7 +3,7 @@
 
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 
-## WeaponTag (1.5)
+## WeaponTag (1.51)
 Fun (hopefully) gamemode that forces people to use the weapon you kill them with.
 (e.g. if someone kills you with a rocket launcher you'll be forced to use only the rocket launcher until you frag someone)
 #### If you're tagged you won't have a weapon pullout animation on spawn
@@ -72,6 +72,9 @@ sm_printentities "Print out all entity classnames to the server console"
 
 ## Installation
 1. Compile the plugins using a SourcePawn compiler (there should be one or more in /addons/sourcemod/scripting) ***OR*** Download the compiled plugins from one of the releases (doesn't need to be the latest one, it's just that they have more features & bugfixes)
-2. Put them in your server plugins folder (/addons/sourcemod/plugins)
-3. Download the translations file (put in /addons/sourcemod/translations)
-4. Verify that they're loaded on the server using "sm plugins list"
+2. (If you're compling) If you don't already have morecolors.inc, add it to your /addons/sourcemod/scripting/include from [here](https://github.com/DoctorMcKay/sourcemod-plugins/blob/master/scripting/include/morecolors.inc)
+3. Put the compiled plugins in your server plugins folder (/addons/sourcemod/plugins)
+4. Download the translations file (put in /addons/sourcemod/translations)
+5. Verify that they're loaded on the server using "sm plugins list"
+
+   #### If you have any issues or suggestions, feel free to message me on Discord (@ratest) or make an issue on this repo
