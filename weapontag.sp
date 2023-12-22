@@ -23,7 +23,7 @@ public Plugin myinfo = {
 	name = "Weapon Tag",
 	author = "ratest",
 	description = "Fun (hopefully) gamemode that forces people to use the weapon you kill them with.",
-	version = "1.5",
+	version = "1.51",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -64,6 +64,15 @@ public void OnPluginStart() {
 	}
 }
 
+public void OnMapStart() {
+	// how didnt i think of this before
+	for(int i = 1; i <= MaxClients; ++i) {
+		taggedPlayers[i] = false;
+		taggedFragsPlayers[i] = 0;
+		taggedPlayersWeapons[i] = "";
+	}
+}
+
 public void OnClientPutInServer(int iClient) {
 	SDKHook(iClient, SDKHook_WeaponSwitch, Event_WeaponSwitch);
 	
@@ -85,6 +94,14 @@ public void OF_OnPlayerSpawned(int iClient) {
 	}
 	
 	if(taggedPlayers[iClient]) {
+		if(strlen(taggedPlayersWeapons[iClient]) < 2) {
+			UntagPlayer(iClient);
+			if(bDebug) {
+				PrintToServer("Tagged player %i has empty weapon, untagging", iClient);
+			}
+			return;
+		}
+		
 		if(bStrip) {
 			TF2_RemoveAllWeapons(iClient);
 		}
@@ -219,6 +236,13 @@ void Event_PlayerDeath(Event event, const char[] evName, bool dontBroadcast) {
 	if(iVictim == 0) {
 		if(bDebug) {
 			PrintToServer("Invalid victim, returning");
+		}
+		return;
+	}
+	
+	if(!IsPlayerAlive(iAttacker)) {
+		if(bDebug) {
+			PrintToServer("Attacker is dead, returning");
 		}
 		return;
 	}
