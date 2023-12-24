@@ -19,7 +19,7 @@ public Plugin myinfo = {
 	name = "Map Dependent Frag Limit",
 	author = "ratest",
 	description = "Lets you assign a frag limit to a map",
-	version = "1.1",
+	version = "1.11",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
