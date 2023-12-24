@@ -9,15 +9,8 @@ ConVar g_cvarMapFragLimitFilePath = null;
 ConVar g_cvarMapFragLimitAnnounce = null;
 ConVar g_cvarMapFragLimitAnnounceTime = null;
 
-bool g_bAnnounceDebounce = false;
+bool g_bFirstEnable = true;
 
-// turns out sourcepawn doesnt support structs :c
-/*typedef struct MapFrags {
-	char szMapName[128];
-	int iFrags;
-} MapFrags;
-
-MapFrags g_mapFrags[64]; */
 char g_szMapName[64][128];
 int g_iMapFrags[64];
 int g_iMapFragsCount = 0;
@@ -53,7 +46,6 @@ Action Command_MapFragLimitReload(int iClient, int iArgs) {
 }
 
 void LoadMapFrags() {
-	g_bAnnounceDebounce = false;
 	g_iMapFragsCount = 0;
 	char szFilePath[256];
 	char szFullFilePath[512];
@@ -109,22 +101,12 @@ void ChangeMapFragLimit() {
 }
 
 public Action FragLimitDelayedAnnounce(Handle hTimer, int iMapIndex) {
-	if(g_bAnnounceDebounce) {
-		return Plugin_Handled;
-	}
-	g_bAnnounceDebounce = true;
-	CreateTimer(15.0, DelayedDebounceDisable);
 	if(!GetConVarBool(g_cvarMapFragLimitAnnounce)) {
 		return Plugin_Handled;
 	}
 	
 	CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
 	
-	return Plugin_Handled;
-}
-
-public Action DelayedDebounceDisable(Handle hTimer) {
-	g_bAnnounceDebounce = false;
 	return Plugin_Handled;
 }
 
@@ -178,7 +160,12 @@ void RemoveServerTagRat(char[] strTag) {
 public void Event_ChangeMapFragLimitEnabled(ConVar cvar, char[] strPrev, char[] strNew) {
 	if(GetConVarBool(cvar)) {
 		AddServerTagRat("mapfraglimit");
-		ChangeMapFragLimit();
+		// so that it doesnt trigger twice when the plugin first loads
+		if(g_bFirstEnable) {
+			g_bFirstEnable = false;
+		} else {
+			ChangeMapFragLimit();
+		}
 	} else {
 		RemoveServerTagRat("mapfraglimit");
 	}
