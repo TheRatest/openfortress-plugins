@@ -31,8 +31,9 @@ Removes all weapons (or only the pistol) from a player when they spawn
 
 Associated server tag: "stripweapons"
 
-## Map Dependent Frag Limit (1.11)
+## Map Dependent Frag Limit (1.2)
 Lets you assign a frag limit to a map
+#### You can use this plugin in conjunction with [Dynamic Frags](https://github.com/Tholp1/Dynamic-Frags), but if you do, make sure you aren't setting *sm_dynamicfrags_basefrags* in your config files!
 | ConVar                         | Description                                           | Default Value                       | Acceptable Values     | Notes |
 |--------------------------------|-------------------------------------------------------|-------------------------------------|-----------------------|-------|
 | of_mapfraglimit_enabled        | Enable map dependent frag limit                       | 0                                   | 0 or 1                |       |
