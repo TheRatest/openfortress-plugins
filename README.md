@@ -31,7 +31,7 @@ Removes all weapons (or only the pistol) from a player when they spawn
 
 Associated server tag: "stripweapons"
 
-## Map Dependent Frag Limit (1.1)
+## Map Dependent Frag Limit (1.11)
 Lets you assign a frag limit to a map
 | ConVar                         | Description                                           | Default Value                       | Acceptable Values     | Notes |
 |--------------------------------|-------------------------------------------------------|-------------------------------------|-----------------------|-------|
