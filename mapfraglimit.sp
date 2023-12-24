@@ -14,12 +14,13 @@ bool g_bFirstEnable = true;
 char g_szMapName[64][128];
 int g_iMapFrags[64];
 int g_iMapFragsCount = 0;
+int g_iDynamicFragsUpdate = 0;
 
 public Plugin myinfo = {
 	name = "Map Dependent Frag Limit",
 	author = "ratest",
 	description = "Lets you assign a frag limit to a map",
-	version = "1.11",
+	version = "1.2",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -82,20 +83,39 @@ void LoadMapFrags() {
 }
 
 public void OnMapStart() {
-	ChangeMapFragLimit();
+	g_iDynamicFragsUpdate = 0;
+	if(GetConVarBool(g_cvarMapFragLimitEnabled)) {
+		ChangeMapFragLimit();
+	}
 }
 
-void ChangeMapFragLimit() {
+void ChangeMapFragLimit() {	
 	char szMapName[128];
 	GetCurrentMap(szMapName, 128);
 	
 	ConVar cvarFragLimit = FindConVar("mp_fraglimit");
+	ConVar cvarDynamicFragsBase = FindConVar("sm_dynamicfrags_basefrags");
 	
 	for(int i = 0; i < g_iMapFragsCount; ++i) {
 		if(StrEqual(szMapName, g_szMapName[i])) {
+			g_iDynamicFragsUpdate = g_iMapFrags[i];
+			if(cvarDynamicFragsBase != INVALID_HANDLE) {
+				SetConVarInt(cvarDynamicFragsBase, g_iMapFrags[i], true, false);
+			}
+			
 			SetConVarInt(cvarFragLimit, g_iMapFrags[i], true, false);
 			CreateTimer(GetConVarFloat(g_cvarMapFragLimitAnnounceTime), FragLimitDelayedAnnounce, i);
 			break;
+		}
+	}
+}
+
+public void OnAllPluginsLoaded() {
+	if(g_iDynamicFragsUpdate != 0) {
+		ConVar cvarDynamicFragsBase = FindConVar("sm_dynamicfrags_basefrags");
+		
+		if(cvarDynamicFragsBase != INVALID_HANDLE) {
+			SetConVarInt(cvarDynamicFragsBase, g_iDynamicFragsUpdate, true, false);
 		}
 	}
 }
@@ -106,6 +126,7 @@ public Action FragLimitDelayedAnnounce(Handle hTimer, int iMapIndex) {
 	}
 	
 	CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
+	PrintToServer("Frag limit for %s: %i", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
 	
 	return Plugin_Handled;
 }
