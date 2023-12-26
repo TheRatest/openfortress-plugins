@@ -22,4 +22,9 @@
 		"#format"		"{1:s},{2:i}"
 		"en"			"Frag limit for {1}: {2}"
 	}
+	"Rat FragLimitAnnounce DynamicFrags"
+	{
+		"#format"		"{1:s},{2:i},{3:i}"
+		"en"			"Frag limit for {1}: {2} + {3} * Amount of players"
+	}
 }

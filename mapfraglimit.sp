@@ -20,7 +20,7 @@ public Plugin myinfo = {
 	name = "Map Dependent Frag Limit",
 	author = "ratest",
 	description = "Lets you assign a frag limit to a map",
-	version = "1.2",
+	version = "1.21",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -43,7 +43,8 @@ public void OnPluginStart() {
 
 Action Command_MapFragLimitReload(int iClient, int iArgs) {
 	LoadMapFrags();
-	return Plugin_Continue;
+	ReplyToCommand(iClient, "[MapFragLimit] 2nd config file reloaded!");
+	return Plugin_Handled;
 }
 
 void LoadMapFrags() {
@@ -125,7 +126,11 @@ public Action FragLimitDelayedAnnounce(Handle hTimer, int iMapIndex) {
 		return Plugin_Handled;
 	}
 	
-	CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
+	if(FindConVar("sm_dynamicfrags_multiplier") != INVALID_HANDLE) {
+		CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce DynamicFrags", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex], GetConVarInt(FindConVar("sm_dynamicfrags_multiplier")));
+	} else {
+		CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
+	}
 	PrintToServer("Frag limit for %s: %i", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
 	
 	return Plugin_Handled;
