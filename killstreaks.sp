@@ -20,7 +20,7 @@ public Plugin myinfo = {
 	name = "Killstreaks",
 	author = "ratest",
 	description = "Keep track of players' killstreak and announce the highest killstreaker each round",
-	version = "1.0",
+	version = "1.1",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -73,6 +73,9 @@ public void OnClientConnected(int iClient) {
 }
 
 void Event_PlayerDeath(Event event, const char[] evName, bool bDontBroadcast) {
+	if(!GetConVarBool(g_cvarPluginEnabled))
+		return;
+	
 	int iVictimId = GetEventInt(event, "userid");
 	int iAttackerId = GetEventInt(event, "attacker");
 	
@@ -108,6 +111,9 @@ void Event_RoundStart(Event event, const char[] evName, bool bDontBroadcast) {
 }
 
 void Event_RoundEnd(Event event, const char[] evName, bool bDontBroadcast) {
+	if(!GetConVarBool(g_cvarPluginEnabled))
+		return;
+	
 	if(!GetConVarBool(g_cvarAnnounceKillstreakRoundEnd))
 		return;
 		
