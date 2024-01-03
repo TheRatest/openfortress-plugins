@@ -3,6 +3,44 @@
 
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 
+## Killstreaks (1.11)
+Keep track of players' killstreak and announce the highest killstreaker each round
+
+| ConVar                                  | Description                                               | Default Value | Acceptable Values     | Notes                                 |
+|-----------------------------------------|-----------------------------------------------------------|---------------|-----------------------|---------------------------------------|
+| of_killstreaks_enabled                  | Enable this plugin                                        | 1             | 0 or 1                |                                       |
+| of_killstreaks_announce_progress        | Announce killstreaks every N frags                        | 1             | 0 or 1                |                                       |
+| of_killstreaks_announce_progress_amount | The amount of frags required to announce a killstreak     | 5             | Any reasonable number | Announces each N frags, not just once |
+| of_killstreak_announce_end              | Announce the highest killstreaker at the end of the round | 1             | 0 or 1                |                                       |
+| of_killstreaks_announce_console         | Announce killstreaks to the server console                | 1             | 0 or 1                |                                       |
+
+Associated server tag: "killstreaks"
+
+## Map Dependent Frag Limit (1.21)
+Lets you assign a frag limit to a map
+#### You can use this plugin in conjunction with [Dynamic Frags](https://github.com/Tholp1/Dynamic-Frags), but if you do, make sure you aren't setting *sm_dynamicfrags_basefrags* in your config files!
+| ConVar                         | Description                                           | Default Value                       | Acceptable Values     | Notes |
+|--------------------------------|-------------------------------------------------------|-------------------------------------|-----------------------|-------|
+| of_mapfraglimit_enabled        | Enable map dependent frag limit                       | 0                                   | 0 or 1                |       |
+| of_mapfraglimit_announce       | Announce the frag limit for the map in chat           | 1                                   | 0 or 1                |       |
+| of_mapfraglimit_announce_delay | How many seconds to wait before announcing the change | 30                                  | Any reasonable number |       |
+| of_mapfraglimit_file           | The 2nd config file path                              | cfg/sourcemod/mapfraglimit-maps.cfg | Any file path         |       |
+
+The 2nd config file must have the map names and their respective frag limits
+2nd config file example:
+```
+dm_skate 10
+dm_gump 20
+dm_doomspire_alt2 15
+dm_crossfire 25
+```
+#### Server commands:
+```
+of_mapfraglimit_reload "Reload the 2nd config for this plugin" (Admin command)
+```
+
+Associated server tag: "mapfraglimit"
+
 ## WeaponTag (1.51)
 Fun (hopefully) gamemode that forces people to use the weapon you kill them with.
 (e.g. if someone kills you with a rocket launcher you'll be forced to use only the rocket launcher until you frag someone)
@@ -30,31 +68,6 @@ Removes all weapons (or only the pistol) from a player when they spawn
 | of_strippistol  | Remove the pistol from a player when they spawn  | 0             | 0 or 1            |                 |
 
 Associated server tag: "stripweapons"
-
-## Map Dependent Frag Limit (1.21)
-Lets you assign a frag limit to a map
-#### You can use this plugin in conjunction with [Dynamic Frags](https://github.com/Tholp1/Dynamic-Frags), but if you do, make sure you aren't setting *sm_dynamicfrags_basefrags* in your config files!
-| ConVar                         | Description                                           | Default Value                       | Acceptable Values     | Notes |
-|--------------------------------|-------------------------------------------------------|-------------------------------------|-----------------------|-------|
-| of_mapfraglimit_enabled        | Enable map dependent frag limit                       | 0                                   | 0 or 1                |       |
-| of_mapfraglimit_announce       | Announce the frag limit for the map in chat           | 1                                   | 0 or 1                |       |
-| of_mapfraglimit_announce_delay | How many seconds to wait before announcing the change | 30                                  | Any reasonable number |       |
-| of_mapfraglimit_file           | The 2nd config file path                              | cfg/sourcemod/mapfraglimit-maps.cfg | Any file path         |       |
-
-The 2nd config file must have the map names and their respective frag limits
-2nd config file example:
-```
-dm_skate 10
-dm_gump 20
-dm_doomspire_alt2 15
-dm_crossfire 25
-```
-#### Server commands:
-```
-of_mapfraglimit_reload "Reload the 2nd config for this plugin" (Admin command)
-```
-
-Associated server tag: "mapfraglimit"
 
 ## RocketSpeed (1.2)
 Modify the rocket projectile speed
