@@ -4,7 +4,7 @@
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 
 ## Killstreaks (1.11)
-Keep track of players' killstreak and announce the highest killstreaker each round
+Keep track of players' killstreaks and announce the highest killstreak each round
 
 | ConVar                                  | Description                                               | Default Value | Acceptable Values     | Notes                                 |
 |-----------------------------------------|-----------------------------------------------------------|---------------|-----------------------|---------------------------------------|
