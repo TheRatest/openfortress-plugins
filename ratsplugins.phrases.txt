@@ -27,4 +27,14 @@
 		"#format"		"{1:s},{2:i},{3:i}"
 		"en"			"Frag limit for {1}: {2} + {3} * Amount of players"
 	}
+	"Rat Killstreak"
+	{
+		"#format"		"{1:s},{2:i}"
+		"en"			"{1} has reached a killstreak of {2}!"
+	}
+	"Rat KillstreakRoundEnd"
+	{
+		"#format"		"{1:s},{2:i}"
+		"en"			"Highest killstreak: {1} with {2} frags"
+	}
 }
