@@ -21,7 +21,7 @@ public Plugin myinfo = {
 	name = "Killstreaks",
 	author = "ratest",
 	description = "Keep track of players' killstreak and announce the highest killstreaker each round",
-	version = "1.13",
+	version = "1.2",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -43,9 +43,11 @@ public void OnPluginStart() {
 	// for server tags and resetting killstreaks
 	g_cvarPluginEnabled.AddChangeHook(Event_PluginStateChanged);
 	
-	AddServerTagRat("killstreaks");
-	
 	AutoExecConfig(true, "killstreaks");
+	
+	if(GetConVarBool(g_cvarPluginEnabled)) {
+		AddServerTagRat("killstreaks");
+	}
 }
 
 Action Command_ResetKillstreaks(int iClient, int iArgs) {
@@ -98,7 +100,7 @@ void Event_PlayerDeath(Event event, const char[] evName, bool bDontBroadcast) {
 		if(GetConVarBool(g_cvarAnnounceKillstreakProgress)) {
 			char szClientName[128];
 			GetClientName(iClient, szClientName, 128);
-			CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat Killstreak", szClientName, g_iKillstreaks[iClient]);
+			CPrintToChatAllEx(iClient, "%t %t", "Rat CommandPrefix", "Rat Killstreak", szClientName, g_iKillstreaks[iClient]);
 			
 			if(GetConVarBool(g_cvarAnnounceKillstreaksConsole)) {
 				char szServerText[512];
@@ -139,7 +141,7 @@ void Event_RoundEnd(Event event, const char[] evName, bool bDontBroadcast) {
 		return;
 	
 	if(GetConVarBool(g_cvarAnnounceKillstreakRoundEnd)) {
-		CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat KillstreakRoundEnd", g_szHighestKillstreakerName, g_iHighestKillstreak);
+		CPrintToChatAllEx(g_iHighestKillstreakClient, "%t %t", "Rat CommandPrefix", "Rat KillstreakRoundEnd", g_szHighestKillstreakerName, g_iHighestKillstreak);
 		
 		if(GetConVarBool(g_cvarAnnounceKillstreaksConsole)) {
 			char szText[256];
