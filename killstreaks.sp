@@ -20,7 +20,7 @@ public Plugin myinfo = {
 	name = "Killstreaks",
 	author = "ratest",
 	description = "Keep track of players' killstreak and announce the highest killstreaker each round",
-	version = "1.11",
+	version = "1.12",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -40,6 +40,10 @@ public void OnPluginStart() {
 	
 	// for server tags and resetting killstreaks
 	g_cvarPluginEnabled.AddChangeHook(Event_PluginStateChanged);
+	
+	AddServerTagRat("killstreaks");
+	
+	AutoExecConfig(true, "killstreaks");
 }
 
 Action Command_ResetKillstreaks(int iClient, int iArgs) {
