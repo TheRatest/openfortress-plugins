@@ -9,6 +9,7 @@ ConVar g_cvarAnnounceKillstreakProgressAmount = null;
 ConVar g_cvarAnnounceKillstreakProgress = null;
 ConVar g_cvarAnnounceKillstreakRoundEnd = null;
 ConVar g_cvarAnnounceKillstreaksConsole = null;
+ConVar g_cvarAnnounceKillstreaksServer = null;
 
 int g_iKillstreaks[MAXPLAYERS];
 
@@ -20,7 +21,7 @@ public Plugin myinfo = {
 	name = "Killstreaks",
 	author = "ratest",
 	description = "Keep track of players' killstreak and announce the highest killstreaker each round",
-	version = "1.12",
+	version = "1.13",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -32,6 +33,7 @@ public void OnPluginStart() {
 	g_cvarAnnounceKillstreakProgress = CreateConVar("of_killstreaks_announce_progress", "1", "Announce killstreaks each N kills");
 	g_cvarAnnounceKillstreakRoundEnd = CreateConVar("of_killstreaks_announce_end", "1", "Announce the highest killstreak when the round ends");
 	g_cvarAnnounceKillstreaksConsole = CreateConVar("of_killstreaks_announce_console", "1", "Announce killstreaks to the server console");
+	g_cvarAnnounceKillstreaksServer = CreateConVar("of_killstreaks_server", "0", "Count the server's kills");
 	RegAdminCmd("of_killstreaks_reset", Command_ResetKillstreaks, ADMFLAG_CHANGEMAP, "Set everyone's killstreak back to 0");
 	
 	HookEvent("player_death", Event_PlayerDeath);
@@ -86,6 +88,9 @@ void Event_PlayerDeath(Event event, const char[] evName, bool bDontBroadcast) {
 	int iVictim = GetClientOfUserId(iVictimId);
 	int iClient = GetClientOfUserId(iAttackerId);
 	
+	if(!GetConVarBool(g_cvarAnnounceKillstreaksServer) && iClient == 0)
+		return;
+	
 	g_iKillstreaks[iVictim] = 0;
 	++g_iKillstreaks[iClient];
 	
@@ -102,6 +107,9 @@ void Event_PlayerDeath(Event event, const char[] evName, bool bDontBroadcast) {
 			}
 		}
 	}
+	
+	if(iClient == 0)
+		return;
 	
 	if(g_iKillstreaks[iClient] > g_iHighestKillstreak) {
 		g_iHighestKillstreak = g_iKillstreaks[iClient];
