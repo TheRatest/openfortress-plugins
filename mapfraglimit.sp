@@ -7,7 +7,6 @@
 ConVar g_cvarMapFragLimitEnabled = null;
 ConVar g_cvarMapFragLimitFilePath = null;
 ConVar g_cvarMapFragLimitAnnounce = null;
-ConVar g_cvarMapFragLimitAnnounceTime = null;
 
 bool g_bFirstEnable = true;
 
@@ -15,12 +14,13 @@ char g_szMapName[64][128];
 int g_iMapFrags[64];
 int g_iMapFragsCount = 0;
 int g_iDynamicFragsUpdate = 0;
+int g_iCurrentMapIndex = -1;
 
 public Plugin myinfo = {
 	name = "Map Dependent Frag Limit",
 	author = "ratest",
 	description = "Lets you assign a frag limit to a map",
-	version = "1.21",
+	version = "1.3",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -29,13 +29,14 @@ public void OnPluginStart() {
 	
 	g_cvarMapFragLimitEnabled = CreateConVar("of_mapfraglimit_enabled", "0", "Enable map dependent frag limit");
 	g_cvarMapFragLimitAnnounce = CreateConVar("of_mapfraglimit_announce", "1", "Announce the frag limit for the map in chat");
-	g_cvarMapFragLimitAnnounceTime = CreateConVar("of_mapfraglimit_announce_delay", "30", "How many seconds to wait before announcing the change");
 	g_cvarMapFragLimitFilePath = CreateConVar("of_mapfraglimit_file", "cfg/sourcemod/mapfraglimit-maps.cfg", "The 2nd config file path");
 	
 	RegAdminCmd("of_mapfraglimit_reload", Command_MapFragLimitReload, ADMFLAG_KICK, "Reload the 2nd config for this plugin");
 	
 	// server tags
 	g_cvarMapFragLimitEnabled.AddChangeHook(Event_ChangeMapFragLimitEnabled);
+	
+	HookEvent("teamplay_round_start", Event_RoundStart);
 
 	AutoExecConfig(true, "mapfraglimit");
 	LoadMapFrags();
@@ -85,6 +86,7 @@ void LoadMapFrags() {
 
 public void OnMapStart() {
 	g_iDynamicFragsUpdate = 0;
+	g_iCurrentMapIndex = -1;
 	if(GetConVarBool(g_cvarMapFragLimitEnabled)) {
 		ChangeMapFragLimit();
 	}
@@ -104,8 +106,8 @@ void ChangeMapFragLimit() {
 				SetConVarInt(cvarDynamicFragsBase, g_iMapFrags[i], true, false);
 			}
 			
+			g_iCurrentMapIndex = i;
 			SetConVarInt(cvarFragLimit, g_iMapFrags[i], true, false);
-			CreateTimer(GetConVarFloat(g_cvarMapFragLimitAnnounceTime), FragLimitDelayedAnnounce, i);
 			break;
 		}
 	}
@@ -121,19 +123,25 @@ public void OnAllPluginsLoaded() {
 	}
 }
 
-public Action FragLimitDelayedAnnounce(Handle hTimer, int iMapIndex) {
+public void Event_RoundStart(Event event, char[] szEventName, bool bDontBroadcast) {
+	if(GameRules_GetProp("m_bInWaitingForPlayers"))
+		return;
+	
+	if(g_iCurrentMapIndex == -1)
+		return;
+	
 	if(!GetConVarBool(g_cvarMapFragLimitAnnounce)) {
-		return Plugin_Handled;
+		return;
 	}
 	
 	if(FindConVar("sm_dynamicfrags_multiplier") != INVALID_HANDLE) {
-		CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce DynamicFrags", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex], GetConVarInt(FindConVar("sm_dynamicfrags_multiplier")));
+		CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce DynamicFrags", g_szMapName[g_iCurrentMapIndex], g_iMapFrags[g_iCurrentMapIndex], GetConVarInt(FindConVar("sm_dynamicfrags_multiplier")));
 	} else {
-		CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
+		CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat FragLimitAnnounce", g_szMapName[g_iCurrentMapIndex], g_iMapFrags[g_iCurrentMapIndex]);
 	}
-	PrintToServer("Frag limit for %s: %i", g_szMapName[iMapIndex], g_iMapFrags[iMapIndex]);
+	PrintToServer("Frag limit for %s: %i", g_szMapName[g_iCurrentMapIndex], g_iMapFrags[g_iCurrentMapIndex]);
 	
-	return Plugin_Handled;
+	return;
 }
 
 void AddServerTagRat(char[] strTag) {

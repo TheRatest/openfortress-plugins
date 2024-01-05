@@ -7,6 +7,7 @@
 ConVar g_cvarPluginEnabled = null;
 ConVar g_cvarAnnounceKillstreakProgressAmount = null;
 ConVar g_cvarAnnounceKillstreakProgress = null;
+ConVar g_cvarAnnounceKillstreakInterrupt = null;
 ConVar g_cvarAnnounceKillstreakRoundEnd = null;
 ConVar g_cvarAnnounceKillstreaksConsole = null;
 ConVar g_cvarAnnounceKillstreaksServer = null;
@@ -21,7 +22,7 @@ public Plugin myinfo = {
 	name = "Killstreaks",
 	author = "ratest",
 	description = "Keep track of players' killstreak and announce the highest killstreaker each round",
-	version = "1.2",
+	version = "1.3",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -31,6 +32,7 @@ public void OnPluginStart() {
 	g_cvarPluginEnabled = CreateConVar("of_killstreaks_enabled", "1", "Enable this plugin");
 	g_cvarAnnounceKillstreakProgressAmount = CreateConVar("of_killstreaks_announce_progress_amount", "5", "The amount of frags required to announce a killstreak");
 	g_cvarAnnounceKillstreakProgress = CreateConVar("of_killstreaks_announce_progress", "1", "Announce killstreaks each N kills");
+	g_cvarAnnounceKillstreakInterrupt = CreateConVar("of_killstreaks_announce_interrupt", "1", "Announce killstreaks getting interrupted (when someone with a killstreak dies)");
 	g_cvarAnnounceKillstreakRoundEnd = CreateConVar("of_killstreaks_announce_end", "1", "Announce the highest killstreak when the round ends");
 	g_cvarAnnounceKillstreaksConsole = CreateConVar("of_killstreaks_announce_console", "1", "Announce killstreaks to the server console");
 	g_cvarAnnounceKillstreaksServer = CreateConVar("of_killstreaks_server", "0", "Count the server's kills");
@@ -92,6 +94,14 @@ void Event_PlayerDeath(Event event, const char[] evName, bool bDontBroadcast) {
 	
 	if(!GetConVarBool(g_cvarAnnounceKillstreaksServer) && iClient == 0)
 		return;
+	
+	if(g_iKillstreaks[iVictim] > GetConVarInt(g_cvarAnnounceKillstreakProgressAmount) && GetConVarBool(g_cvarAnnounceKillstreakInterrupt) && iClient != 0) {
+		char szClientName[128];
+		char szClientNameEx[128];
+		GetClientName(iClient, szClientName, 128);
+		GetClientName(iVictim, szClientNameEx, 128);
+		CPrintToChatAllEx(iClient, "%t %t", "Rat CommandPrefix", "Rat KillstreakInterrupt", szClientName, szClientNameEx, g_iKillstreaks[iClient]);
+	}
 	
 	g_iKillstreaks[iVictim] = 0;
 	++g_iKillstreaks[iClient];
