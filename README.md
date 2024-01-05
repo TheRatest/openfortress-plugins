@@ -3,27 +3,33 @@
 
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 
-## Killstreaks (1.2)
+## Killstreaks (1.3)
 Keep track of players' killstreaks and announce the highest killstreak each round
 
-| ConVar                                  | Description                                               | Default Value | Acceptable Values     | Notes                                 |
-|-----------------------------------------|-----------------------------------------------------------|---------------|-----------------------|---------------------------------------|
-| of_killstreaks_enabled                  | Enable this plugin                                        | 1             | 0 or 1                |                                       |
-| of_killstreaks_announce_progress        | Announce killstreaks every N frags                        | 1             | 0 or 1                |                                       |
-| of_killstreaks_announce_progress_amount | The amount of frags required to announce a killstreak     | 5             | Any reasonable number | Announces each N frags, not just once |
-| of_killstreak_announce_end              | Announce the highest killstreaker at the end of the round | 1             | 0 or 1                |                                       |
-| of_killstreaks_announce_console         | Announce killstreaks to the server console                | 1             | 0 or 1                |                                       |
+| ConVar                                  | Description                                                                    | Default Value | Acceptable Values     | Notes                                 |
+|-----------------------------------------|--------------------------------------------------------------------------------|---------------|-----------------------|---------------------------------------|
+| of_killstreaks_enabled                  | Enable this plugin                                                             | 1             | 0 or 1                |                                       |
+| of_killstreaks_server                   | Count the server's kills                                                       | 0             | 0 or 1                |                                       |
+| of_killstreaks_announce_progress_amount | The amount of frags required to announce a killstreak                          | 5             | Any reasonable number | Announces each N frags, not just once |
+| of_killstreaks_announce_progress        | Announce killstreaks every N frags                                             | 1             | 0 or 1                |                                       |
+| of_killstreaks_announce_interrupt       | Announce killstreaks getting interrupted (when someone with a killstreak dies) | 1             | 0 or 1                |                                       |
+| of_killstreaks_announce_end             | Announce the highest killstreaker at the end of the round                      | 1             | 0 or 1                |                                       |
+| of_killstreaks_announce_console         | Announce killstreaks to the server console                                     | 1             | 0 or 1                |                                       |
+
+#### Server commands:
+```
+of_killstreaks_reset "Set everyone's killstreak back to 0" (Admin command)
+```
 
 Associated server tag: "killstreaks"
 
-## Map Dependent Frag Limit (1.21)
+## Map Dependent Frag Limit (1.3)
 Lets you assign a frag limit to a map
 #### You can use this plugin in conjunction with [Dynamic Frags](https://github.com/Tholp1/Dynamic-Frags), but if you do, make sure you aren't setting *sm_dynamicfrags_basefrags* in your config files!
 | ConVar                         | Description                                           | Default Value                       | Acceptable Values     | Notes |
 |--------------------------------|-------------------------------------------------------|-------------------------------------|-----------------------|-------|
 | of_mapfraglimit_enabled        | Enable map dependent frag limit                       | 0                                   | 0 or 1                |       |
 | of_mapfraglimit_announce       | Announce the frag limit for the map in chat           | 1                                   | 0 or 1                |       |
-| of_mapfraglimit_announce_delay | How many seconds to wait before announcing the change | 30                                  | Any reasonable number |       |
 | of_mapfraglimit_file           | The 2nd config file path                              | cfg/sourcemod/mapfraglimit-maps.cfg | Any file path         |       |
 
 The 2nd config file must have the map names and their respective frag limits
