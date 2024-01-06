@@ -37,4 +37,9 @@
 		"#format"		"{1:s},{2:i}"
 		"en"			"Highest killstreak: {1} with {2} frags"
 	}
+	"Rat KillstreakInterrupt"
+	{
+		"#format"		"{1:s},{2:s},{3:i}"
+		"en"			"{1} has ended {2}'s killstreak of {3}"
+	}
 }
