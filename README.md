@@ -47,7 +47,7 @@ of_mapfraglimit_reload "Reload the 2nd config for this plugin" (Admin command)
 
 Associated server tag: "mapfraglimit"
 
-## Don't make the jumppads slow me down! (1.0)
+## Don't make the jumppads slow me down! (1.1)
 Modifies all of the jumppads to add to the player's velocity instead of resetting it
 
 | ConVar              | Description                                                                          | Default Value | Acceptable Values | Notes |
