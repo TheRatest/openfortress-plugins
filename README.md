@@ -47,6 +47,15 @@ of_mapfraglimit_reload "Reload the 2nd config for this plugin" (Admin command)
 
 Associated server tag: "mapfraglimit"
 
+## Don't make the jumppads slow me down! (1.0)
+Modifies all of the jumppads to add to the player's velocity instead of resetting it
+
+| ConVar              | Description                                                                          | Default Value | Acceptable Values | Notes |
+|---------------------|--------------------------------------------------------------------------------------|---------------|-------------------|-------|
+| of_jumppad_only_add | Modifies all of the jumppads to add to the player's velocity instead of resetting it | 1             | 0 or 1            |       |
+
+Associated server tag: none
+
 ## WeaponTag (1.51)
 Fun (hopefully) gamemode that forces people to use the weapon you kill them with.
 (e.g. if someone kills you with a rocket launcher you'll be forced to use only the rocket launcher until you frag someone)
