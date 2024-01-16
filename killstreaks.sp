@@ -22,7 +22,7 @@ public Plugin myinfo = {
 	name = "Killstreaks",
 	author = "ratest",
 	description = "Keep track of players' killstreak and announce the highest killstreaker each round",
-	version = "1.3",
+	version = "1.33",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -92,18 +92,19 @@ void Event_PlayerDeath(Event event, const char[] evName, bool bDontBroadcast) {
 	int iVictim = GetClientOfUserId(iVictimId);
 	int iClient = GetClientOfUserId(iAttackerId);
 	
-	if(!GetConVarBool(g_cvarAnnounceKillstreaksServer) && iClient == 0)
-		return;
-	
-	if(g_iKillstreaks[iVictim] > GetConVarInt(g_cvarAnnounceKillstreakProgressAmount) && GetConVarBool(g_cvarAnnounceKillstreakInterrupt) && iClient != 0) {
+	if(g_iKillstreaks[iVictim] >= GetConVarInt(g_cvarAnnounceKillstreakProgressAmount) && GetConVarBool(g_cvarAnnounceKillstreakInterrupt) && iClient != 0) {
 		char szClientName[128];
 		char szClientNameEx[128];
 		GetClientName(iClient, szClientName, 128);
 		GetClientName(iVictim, szClientNameEx, 128);
-		CPrintToChatAllEx(iClient, "%t %t", "Rat CommandPrefix", "Rat KillstreakInterrupt", szClientName, szClientNameEx, g_iKillstreaks[iClient]);
+		CPrintToChatAllEx(iClient, "%t %t", "Rat CommandPrefix", "Rat KillstreakInterrupt", szClientName, szClientNameEx, g_iKillstreaks[iVictim]);
 	}
 	
 	g_iKillstreaks[iVictim] = 0;
+	
+	if(!GetConVarBool(g_cvarAnnounceKillstreaksServer) && iClient == 0)
+		return;
+	
 	++g_iKillstreaks[iClient];
 	
 	if(g_iKillstreaks[iClient] % GetConVarInt(g_cvarAnnounceKillstreakProgressAmount) == 0) {
