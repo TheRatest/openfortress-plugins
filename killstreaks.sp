@@ -82,7 +82,7 @@ public void OnClientConnected(int iClient) {
 	g_iKillstreaks[iClient] = 0;
 }
 
-void Event_PlayerDeath(Event event, const char[] evName, bool bDontBroadcast) {
+void Event_PlayerDeath(Event event, const char[] szEventName, bool bDontBroadcast) {
 	if(!GetConVarBool(g_cvarPluginEnabled))
 		return;
 	
@@ -131,7 +131,7 @@ void Event_PlayerDeath(Event event, const char[] evName, bool bDontBroadcast) {
 	}
 }
 
-void Event_RoundStart(Event event, const char[] evName, bool bDontBroadcast) {
+void Event_RoundStart(Event event, const char[] szEventName, bool bDontBroadcast) {
 	for(int i = 0; i < MaxClients; ++i) {
 		g_iKillstreaks[i] = 0;
 	}
@@ -141,7 +141,7 @@ void Event_RoundStart(Event event, const char[] evName, bool bDontBroadcast) {
 	g_szHighestKillstreakerName = "";
 }
 
-void Event_RoundEnd(Event event, const char[] evName, bool bDontBroadcast) {
+void Event_RoundEnd(Event event, const char[] szEventName, bool bDontBroadcast) {
 	if(!GetConVarBool(g_cvarPluginEnabled))
 		return;
 	

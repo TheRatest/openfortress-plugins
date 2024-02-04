@@ -9,7 +9,7 @@ public Plugin myinfo = {
 	name = "Don't make the jumppads slow me down!",
 	author = "ratest",
 	description = "Modifies all of the jumppads to add to the player's velocity instead of resetting it",
-	version = "1.1",
+	version = "1.2",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -33,10 +33,9 @@ public void OnMapStart() {
 			
 		char szClassname[128];
 		GetEntityClassname(iEnt, szClassname, 128);
-		if(!StrEqual("ofd_trigger_jump", szClassname, false))
-			continue;
-			
-		SetEntProp(iEnt, Prop_Send, "m_bNoCompensation", 1, 1);
+		if(StrEqual("ofd_trigger_jump", szClassname, false)) {
+			SetEntProp(iEnt, Prop_Send, "m_bNoCompensation", 1, 1);
+		}
 	}
 }
 
@@ -52,9 +51,8 @@ void Event_RoundStart(Event event, char[] szEventName, bool bDontBroadcast) {
 			
 		char szClassname[128];
 		GetEntityClassname(iEnt, szClassname, 128);
-		if(!StrEqual("ofd_trigger_jump", szClassname, false))
-			continue;
-			
-		SetEntProp(iEnt, Prop_Send, "m_bNoCompensation", 1, 1);
+		if(StrEqual("ofd_trigger_jump", szClassname, false)) {
+			SetEntProp(iEnt, Prop_Send, "m_bNoCompensation", 1, 1);
+		}
 	}
 }

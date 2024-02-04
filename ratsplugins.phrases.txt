@@ -42,4 +42,96 @@
 		"#format"		"{1:s},{2:s},{3:i}"
 		"en"			"{1} has ended {2}'s killstreak of {3}"
 	}
+	"Rat YourStats"
+	{
+		"en"			"Your stats:"
+	}
+	"Rat PlayerStats"
+	{
+		"#format"		"{1:s},{2:s}"
+		"en"			"{2}{1}{default}'s stats:"
+	}
+	"Rat StatsKD"
+	{
+		"#format"		"{1:i},{2:i},{3:f}"
+		"en"			"K/D/R: {1}/{2}/{3}"
+	}
+	"Rat StatsRGHeadshots"
+	{
+		"#format"		"{1:i},{2:i},{3:i}"
+		"en"			"Railgun headshots: {1} ({2}.{3}%% of total shots)"
+	}
+	"Rat StatsAirshots"
+	{
+		"#format"		"{1:i},{2:i}"
+		"en"			"RL/GL airshots: {1}/{2}"
+	}
+	"Rat StatsSSG"
+	{
+		"#format"		"{1:i},{2:i},{3:i}"
+		"en"			"SSG meatshots/normal/misses: {1}/{2}/{3}"
+	}
+	"Rat StatsMeleeAndPowerupKills"
+	{
+		"#format"		"{1:i},{2:i}"
+		"en"			"Melee/Powerup kills: {1}/{2}"
+	}
+	"Rat StatsHighestKillstreak"
+	{
+		"#format"		"{1:i},{2:s}"
+		"en"			"Highest killstreak: {1} frags on {2}"
+	}
+	"Rat StatsMatches"
+	{
+		"#format"		"{1:i},{2:i},{3:i}"
+		"en"			"Wins/Top 3s/Matches: {1}/{2}/{3}"
+	}
+	"Rat StatsDamage"
+	{
+		"#format"		"{1:i},{2:i}"
+		"en"			"Damage dealt/taken: {1}/{2}"
+	}
+	"Rat TopPlayers"
+	{
+		"en"			"Top players:"
+	}
+	"Rat TopFragger"
+	{
+		"#format"		"{1:s},{2:s},{3:i}"
+		"en"			"{default}Most Frags: {2}{1} {default}- {3} kills"
+	}
+	"Rat TopHeadshotter"
+	{
+		"#format"		"{1:s},{2:s},{3:i},{4:i}"
+		"en"			"{default}Highest Railgun HS%%: {2}{1} {default}- {3}.{4}%% of total shots"
+	}
+	"Rat TopKillstreaker"
+	{
+		"#format"		"{1:s},{2:s},{3:i},{4:s}"
+		"en"			"{default}Highest Killstreak: {2}{1} {default}- {3} frags on {4}"
+	}
+	"Rat TopSSGer"
+	{
+		"#format"		"{1:s},{2:s},{3:i}"
+		"en"			"{default}Most SSG Meatshots: {2}{1} {default}- {3}"
+	}
+	"Rat TopDamager"
+	{
+		"#format"		"{1:s},{2:s},{3:i}"
+		"en"			"{default}Most Damage Dealt: {2}{1} {default}- {3}"
+	}
+	"Rat TopHugger"
+	{
+		"#format"		"{1:s},{2:s},{3:i}"
+		"en"			"{default}Best Hugger: {2}{1} {default}- {3} hugs"
+	}
+	"Rat TopWinner"
+	{
+		"#format"		"{1:s},{2:s},{3:i}"
+		"en"			"{default}Most Wins: {2}{1} {default}- {3} wins"
+	}
+	"Rat StatsResetByAdmin"
+	{
+		"en"			"Your stats have been reset by a server administrator"
+	}
 }
