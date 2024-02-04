@@ -3,6 +3,35 @@
 
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 
+## Player Stats (1.0)
+Keeps track of your stats!
+
+| ConVar                           | Description                                                                              | Default Value | Acceptable Values | Notes |
+|----------------------------------|------------------------------------------------------------------------------------------|---------------|-------------------|-------|
+| sm_playerstats_hugs              | Keep track of hugs (when players kill each other within a short timespan)                | 0             | 0 or 1            |       |
+| sm_playerstats_hugs_top          | Show the best hugger in !top (must have hugs enabled beforehand for this to apply)       | 1             | 0 or 1            |       |
+| sm_playerstats_hugtime           | Maximum amount of time that can pass when players killing each other is considered a hug | 1.25          | 0-5               |       |
+| smplayerstats_offlineplayerstats | Whether players can see offline players' stats using their SteamID2                      | 0             | 0 or 1            |       |
+| sm_playerstats_minheadshots      | How many headshots a player must have before they can be a headshotter in !top           | 10            | 0-1000            |       |
+| sm_playerstats_debug             | Print most stat changes to the corresponding player                                      | 0             | 0 or 1            |       |
+
+#### Server commands:
+```
+sm_playerstats_stats "View your stats (or someone else's)"
+sm_playerstats_top "View the top players"
+```
+#### Admin commands:
+```
+sm_playerstats_offlinestats "View an offline player's stats using their SteamID2"
+sm_playerstats_reset "Reset a player's stats (u evil thing)"
+sm_playerstats_erase "Delete all stats a player has without re-initializing new ones (also kicks the player)"
+```
+
+#### Extra installation steps:
+Make a database entry in addons/sourcemod/config/databases.cfg called "player_stats"
+
+Associated server tag: None
+
 ## Killstreaks (1.33)
 Keep track of players' killstreaks and announce the highest killstreak each round
 
