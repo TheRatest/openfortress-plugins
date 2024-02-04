@@ -91,6 +91,11 @@
 		"#format"		"{1:i},{2:i}"
 		"en"			"Damage dealt/taken: {1}/{2}"
 	}
+	"Rat StatsHugs"
+	{
+		"#format"		"{1:i}"
+		"en"			"Hugs: {1}"
+	}
 	"Rat TopPlayers"
 	{
 		"en"			"Top players:"

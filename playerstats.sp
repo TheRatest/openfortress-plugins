@@ -35,12 +35,12 @@ public Plugin myinfo = {
 public void OnPluginStart() {
 	LoadTranslations("ratsplugins.phrases.txt");
 	
-	g_cvarHugsEnabled = CreateConVar("sm_playerstats_hugs", "0", "Keep track of hugs (when player kill each other within a short timespan)", 0, true, 0.0, true, 1.0);
+	g_cvarHugsEnabled = CreateConVar("sm_playerstats_hugs", "0", "Keep track of hugs (when players kill each other within a short timespan)", 0, true, 0.0, true, 1.0);
 	g_cvarHugsTopEnabled = CreateConVar("sm_playerstats_hugs_top", "1", "Show the best hugger in !top (must have hugs enabled beforehand for this to apply)", 0, true, 0.0, true, 1.0);
-	g_cvarHugTime = CreateConVar("sm_playerstats_hugtime", "1.25", "Maximum amount of time that can pass before player killing each other is considered a hug", 0, true, 0.0, true, 5.0);
+	g_cvarHugTime = CreateConVar("sm_playerstats_hugtime", "1.25", "Maximum amount of time that can pass when players killing each other is considered a hug", 0, true, 0.0, true, 5.0);
 	g_cvarOfflinePlayerStats = CreateConVar("sm_playerstats_offlineplayerstats", "0", "Whether players can see offline players' stats using their SteamID2", 0, true, 0.0, true, 1.0);
-	g_cvarDebugLog = CreateConVar("sm_playerstats_debug", "0", "Print most stat changes to the corresponding player", 0, true, 0.0, true, 1.0);
 	g_cvarMinHeadshotsQualify = CreateConVar("sm_playerstats_minheadshots", "10", "How many headshots a player must have before they can be a headshotter in !top", 0, true, 0.0, true, 1000.0);
+	g_cvarDebugLog = CreateConVar("sm_playerstats_debug", "0", "Print most stat changes to the corresponding player", 0, true, 0.0, true, 1.0);
 	
 	RegConsoleCmd("sm_playerstats_stats", Command_ViewStats, "View your stats (or someone else's)");
 	RegConsoleCmd("sm_playerstats_top", Command_ViewTop, "View the top players");
