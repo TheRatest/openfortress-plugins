@@ -28,7 +28,7 @@ public Plugin myinfo = {
 	name = "Player Stats",
 	author = "ratest",
 	description = "Keeps track of your stats!",
-	version = "1.0",
+	version = "1.01",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -146,12 +146,29 @@ bool InitPlayerData(int iClient, const char[] szAuth) {
 	
 	int iPlayerColor = 0;
 	char szPlrClrR[4];
-	GetClientInfo(iClient, "of_color_r", szPlrClrR, 4);
 	char szPlrClrG[4];
-	GetClientInfo(iClient, "of_color_g", szPlrClrG, 4);
 	char szPlrClrB[4];
+	GetClientInfo(iClient, "of_color_r", szPlrClrR, 4);
+	GetClientInfo(iClient, "of_color_g", szPlrClrG, 4);
 	GetClientInfo(iClient, "of_color_b", szPlrClrB, 4);
-	iPlayerColor = StringToInt(szPlrClrB) + StringToInt(szPlrClrG) * 255 + StringToInt(szPlrClrR) * 255 * 255;
+	int iPlrClrRed = StringToInt(szPlrClrR);
+	int iPlrClrGreen = StringToInt(szPlrClrG);
+	int iPlrClrBlue = StringToInt(szPlrClrB);
+	// theoretically the game won't let a player set their color above 255 but yeah, this extra check won't hurt anyone i suppose
+	if(iPlrClrRed < 0)
+		iPlrClrRed = 0;
+	if(iPlrClrRed > 255)
+		iPlrClrRed = 255;
+	if(iPlrClrGreen < 0)
+		iPlrClrGreen = 0;
+	if(iPlrClrGreen > 255)
+		iPlrClrGreen = 255;
+	if(iPlrClrBlue < 0)
+		iPlrClrBlue = 0;
+	if(iPlrClrBlue > 255)
+		iPlrClrBlue = 255;
+	
+	iPlayerColor = iPlrClrBlue + iPlrClrGreen * 256 + iPlrClrRed * 256 * 256;
 	char szQueryColor[128];
 	Format(szQueryColor, 128, "UPDATE player_stats SET color = %i WHERE steam_auth = '%s'", iPlayerColor, szAuth);
 	SQL_FastQuery(g_hSQL, szQueryColor);
@@ -480,7 +497,7 @@ void PrintPlayerStats(int iClient, int iStatsOwner, char[] szAuthArg = "") {
 	hResults.FetchString(1, szName, 128);
 	int iUnresolvedColor = hResults.FetchInt(2);
 	char szColor[12];
-	IntColorToString(iUnresolvedColor, szColor, 12);
+	IntColorToString(iUnresolvedColor, szColor);
 	int iFrags = hResults.FetchInt(3);
 	int iDeaths = hResults.FetchInt(4);
 	float flKDR = hResults.FetchFloat(5);
@@ -531,10 +548,10 @@ void PrintPlayerStats(int iClient, int iStatsOwner, char[] szAuthArg = "") {
 		CPrintToChat(iClient, "%t\n%t\n%t", "Rat StatsMatches", iWins, iTop3Wins, iMatches, "Rat StatsHighestKillstreak", iHighestKS, szHighestKSMap, "Rat StatsDamage", iDamageDealt, iDamageTaken);
 }
 
-void IntColorToString(int iColor, char[] strColor, int iMaxLen) {
-	int iRed = iColor / 255 / 255;
-	int iGreen = iColor / 255 % 255;
-	int iBlue = iColor % 255;
+void IntColorToString(int iColor, char[] strColor, int iMaxLen = 10) {
+	int iRed = iColor / 256 / 256;
+	int iGreen = iColor / 256 % 256;
+	int iBlue = iColor % 256;
 	char szRed[4];
 	char szGreen[4];
 	char szBlue[4];
@@ -572,7 +589,7 @@ void PrintTopPlayers(int iClient) {
 	}
 	SQL_FetchRow(hResults);
 	hResults.FetchString(1, szBestFragger, 128);
-	IntColorToString(hResults.FetchInt(2), szBestFraggerColor, 12);
+	IntColorToString(hResults.FetchInt(2), szBestFraggerColor);
 	iMostFrags = hResults.FetchInt(3);
 	CloseHandle(hResults);
 	
@@ -589,7 +606,7 @@ void PrintTopPlayers(int iClient) {
 	}
 	SQL_FetchRow(hResults);
 	hResults.FetchString(1, szBestPlayer, 128);
-	IntColorToString(hResults.FetchInt(2), szBestPlayerColor, 12);
+	IntColorToString(hResults.FetchInt(2), szBestPlayerColor);
 	iMostWins = hResults.FetchInt(14);
 	CloseHandle(hResults);
 	
@@ -616,7 +633,7 @@ void PrintTopPlayers(int iClient) {
 	}
 	SQL_FetchRow(hResults);
 	hResults.FetchString(1, szBestHeadshotter, 128);
-	IntColorToString(hResults.FetchInt(2), szBestHeadshotterColor, 12);
+	IntColorToString(hResults.FetchInt(2), szBestHeadshotterColor);
 	flBestHSRate = hResults.FetchFloat(11);
 	CloseHandle(hResults);
 	
@@ -637,7 +654,7 @@ void PrintTopPlayers(int iClient) {
 	}
 	SQL_FetchRow(hResults);
 	hResults.FetchString(1, szBestKillstreaker, 128);
-	IntColorToString(hResults.FetchInt(2), szBestKillstreakerColor, 12);
+	IntColorToString(hResults.FetchInt(2), szBestKillstreakerColor);
 	hResults.FetchString(18, szBestKillstreakerMap, 128);
 	iBestKillstreak = hResults.FetchInt(17);
 	CloseHandle(hResults);
@@ -658,7 +675,7 @@ void PrintTopPlayers(int iClient) {
 	}
 	SQL_FetchRow(hResults);
 	hResults.FetchString(1, szBestSSGer, 128);
-	IntColorToString(hResults.FetchInt(2), szBestSSGerColor, 12);
+	IntColorToString(hResults.FetchInt(2), szBestSSGerColor);
 	iMostMeatshots = hResults.FetchInt(22);
 	iSSGNormalShots = hResults.FetchInt(23);
 	iSSGMisses = hResults.FetchInt(24);
@@ -683,7 +700,7 @@ void PrintTopPlayers(int iClient) {
 	}
 	SQL_FetchRow(hResults);
 	hResults.FetchString(1, szBestDamager, 128);
-	IntColorToString(hResults.FetchInt(2), szBestDamagerColor, 12);
+	IntColorToString(hResults.FetchInt(2), szBestDamagerColor);
 	iMostDamage = hResults.FetchInt(19);
 	CloseHandle(hResults);
 	
@@ -700,7 +717,7 @@ void PrintTopPlayers(int iClient) {
 	}
 	SQL_FetchRow(hResults);
 	hResults.FetchString(1, szBestHugger, 128);
-	IntColorToString(hResults.FetchInt(2), szBestHuggerColor, 12);
+	IntColorToString(hResults.FetchInt(2), szBestHuggerColor);
 	iMostHugs = hResults.FetchInt(21);
 	CloseHandle(hResults);
 	
