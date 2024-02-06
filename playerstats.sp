@@ -28,7 +28,7 @@ public Plugin myinfo = {
 	name = "Player Stats",
 	author = "ratest",
 	description = "Keeps track of your stats!",
-	version = "1.02",
+	version = "1.03",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -666,7 +666,7 @@ void PrintTopPlayers(int iClient) {
 	int iSSGMisses = 0;
 	int iSSGTotalShots = 0;
 	
-	Format(szQuery, 256, "SELECT * FROM player_stats WHERE (damage_dealt = (SELECT MAX(damage_dealt) FROM player_stats))");
+	Format(szQuery, 256, "SELECT * FROM player_stats WHERE (ssg_meatshots = (SELECT MAX(ssg_meatshots) FROM player_stats))");
 	hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults == INVALID_HANDLE) {
 		char szErr[256];
