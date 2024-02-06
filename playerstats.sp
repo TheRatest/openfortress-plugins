@@ -28,7 +28,7 @@ public Plugin myinfo = {
 	name = "Player Stats",
 	author = "ratest",
 	description = "Keeps track of your stats!",
-	version = "1.03",
+	version = "1.04",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -762,7 +762,7 @@ public Action OnClientSayCommand(int iClient, const char[] szCommand, const char
 		int aiTargets[2];
 		char szTarget[128];
 		bool bIsMLPhrase;
-		int iTargetsFound = ProcessTargetString(szArgs[1], 1, aiTargets, 2, 0, szTarget, 128, bIsMLPhrase);
+		int iTargetsFound = ProcessTargetString(szArgs[1], 0, aiTargets, 1, 0, szTarget, 128, bIsMLPhrase);
 		if(iTargetsFound > 0) {
 			PrintPlayerStats(iClient, aiTargets[0]);
 			return Plugin_Stop;
@@ -860,7 +860,7 @@ Action Command_ViewStats(int iClient, int iArgs) {
 		int aiTargets[2];
 		char szTarget[128];
 		bool bIsMLPhrase;
-		int iTargetsFound = ProcessTargetString(szTargetName, 1, aiTargets, 2, 0, szTarget, 128, bIsMLPhrase);
+		int iTargetsFound = ProcessTargetString(szTargetName, 0, aiTargets, 1, 0, szTarget, 128, bIsMLPhrase);
 		
 		if(iTargetsFound > 0) {
 			PrintPlayerStats(iClient, aiTargets[0]);
