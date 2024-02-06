@@ -28,7 +28,7 @@ public Plugin myinfo = {
 	name = "Player Stats",
 	author = "ratest",
 	description = "Keeps track of your stats!",
-	version = "1.01",
+	version = "1.02",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -740,7 +740,7 @@ void PrintTopPlayers(int iClient) {
 	
 	CPrintToChat(iClient, "%t %t", "Rat CommandPrefix", "Rat TopPlayers");
 	CPrintToChat(iClient, "%t\n%t", "Rat TopFragger", szBestFragger, szBestFraggerColor, iMostFrags, "Rat TopWinner", szBestPlayer, szBestPlayerColor, iMostWins);
-	CPrintToChat(iClient, "%t\n%t", "Rat TopHeadshotter", szBestHeadshotter, szBestFraggerColor, iBestHSRateHigh, iBestHSRateLow, "Rat TopKillstreaker", szBestKillstreaker, szBestKillstreakerColor, iBestKillstreak, szBestKillstreakerMap);
+	CPrintToChat(iClient, "%t\n%t", "Rat TopHeadshotter", szBestHeadshotter, szBestHeadshotterColor, iBestHSRateHigh, iBestHSRateLow, "Rat TopKillstreaker", szBestKillstreaker, szBestKillstreakerColor, iBestKillstreak, szBestKillstreakerMap);
 	CPrintToChat(iClient, "%t\n%t", "Rat TopSSGer", szBestSSGer, szBestSSGerColor, iMostMeatshots, iMeatshotRateHigh, iMeatshotRateLow, "Rat TopDamager", szBestDamager, szBestDamagerColor, iMostDamage);
 	if(GetConVarBool(g_cvarHugsEnabled) && GetConVarBool(g_cvarHugsTopEnabled)) {
 		CPrintToChat(iClient, "%t", "Rat TopHugger", szBestHugger, szBestHuggerColor, iMostHugs);
