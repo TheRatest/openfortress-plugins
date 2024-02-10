@@ -37,6 +37,11 @@
 		"#format"		"{1:s},{2:i}"
 		"en"			"Highest killstreak: {1} with {2} frags"
 	}
+	"Rat KillstreakRoundEndPerfect"
+	{
+		"#format"		"{1:s},{2:i}"
+		"en"			"Highest killstreak: {1} {orange}(PERFECT KILLSTREAK)"
+	}
 	"Rat KillstreakInterrupt"
 	{
 		"#format"		"{1:s},{2:s},{3:i}"

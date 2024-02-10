@@ -22,7 +22,7 @@ public Plugin myinfo = {
 	name = "Killstreaks",
 	author = "ratest",
 	description = "Keep track of players' killstreak and announce the highest killstreaker each round",
-	version = "1.33",
+	version = "1.4",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -152,15 +152,30 @@ void Event_RoundEnd(Event event, const char[] szEventName, bool bDontBroadcast) 
 		return;
 	
 	if(GetConVarBool(g_cvarAnnounceKillstreakRoundEnd)) {
-		CPrintToChatAllEx(g_iHighestKillstreakClient, "%t %t", "Rat CommandPrefix", "Rat KillstreakRoundEnd", g_szHighestKillstreakerName, g_iHighestKillstreak);
+		if(GetConVarInt(FindConVar("mp_fraglimit")) <= g_iHighestKillstreak)
+			CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat KillstreakRoundEndPerfect", g_szHighestKillstreakerName, g_iHighestKillstreak);
+		else
+			CPrintToChatAll("%t %t", "Rat CommandPrefix", "Rat KillstreakRoundEnd", g_szHighestKillstreakerName, g_iHighestKillstreak);
 		
 		if(GetConVarBool(g_cvarAnnounceKillstreaksConsole)) {
 			char szText[256];
-			Format(szText, 256, "%t %t", "Rat CommandPrefix", "Rat KillstreakRoundEnd", g_szHighestKillstreakerName, g_iHighestKillstreak);
+			if(GetConVarInt(FindConVar("mp_fraglimit")) <= g_iHighestKillstreak)
+				Format(szText, 256, "%t %t", "Rat CommandPrefix", "Rat KillstreakRoundEndPerfect", g_szHighestKillstreakerName, g_iHighestKillstreak);
+			else
+				Format(szText, 256, "%t %t", "Rat CommandPrefix", "Rat KillstreakRoundEnd", g_szHighestKillstreakerName, g_iHighestKillstreak);
+				
 			CRemoveTags(szText, 256);
 			PrintToServer(szText);
 		}
 	}
+	
+	for(int i = 0; i < MaxClients; ++i) {
+		g_iKillstreaks[i] = 0;
+	}
+	
+	g_iHighestKillstreak = 0;
+	g_iHighestKillstreakClient = 0;
+	g_szHighestKillstreakerName = "";
 }
 
 void AddServerTagRat(char[] strTag) {

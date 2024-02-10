@@ -12,6 +12,7 @@ ConVar g_cvarHugTime = null;
 ConVar g_cvarDebugLog = null;
 ConVar g_cvarOfflinePlayerStats = null;
 ConVar g_cvarMinHeadshotsQualify = null;
+ConVar g_cvarEnableWhenCheats = null;
 
 bool g_abInitializedClients[MAXPLAYERS];
 int g_aiKillstreaks[MAXPLAYERS];
@@ -28,7 +29,7 @@ public Plugin myinfo = {
 	name = "Player Stats",
 	author = "ratest",
 	description = "Keeps track of your stats!",
-	version = "1.04",
+	version = "1.1",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -40,6 +41,7 @@ public void OnPluginStart() {
 	g_cvarHugTime = CreateConVar("sm_playerstats_hugtime", "1.25", "Maximum amount of time that can pass when players killing each other is considered a hug", 0, true, 0.0, true, 5.0);
 	g_cvarOfflinePlayerStats = CreateConVar("sm_playerstats_offlineplayerstats", "0", "Whether players can see offline players' stats using their SteamID2", 0, true, 0.0, true, 1.0);
 	g_cvarMinHeadshotsQualify = CreateConVar("sm_playerstats_minheadshots", "10", "How many headshots a player must have before they can be a headshotter in !top", 0, true, 0.0, true, 1000.0);
+	g_cvarEnableWhenCheats = CreateConVar("sm_playerstats_cheats", "0", "Keep updating stats even if sv_cheats are enabled", 0, true, 0.0, true, 1.0);
 	g_cvarDebugLog = CreateConVar("sm_playerstats_debug", "0", "Print most stat changes to the corresponding player", 0, true, 0.0, true, 1.0);
 	
 	RegConsoleCmd("sm_playerstats_stats", Command_ViewStats, "View your stats (or someone else's)");
@@ -110,6 +112,8 @@ public void OnPluginStart() {
 	HookEvent("teamplay_round_win", Event_RoundEnd);
 
 	AutoExecConfig(true, "playerstats");
+	
+	AddServerTagRat("playerstats");
 }
 
 bool InitPlayerData(int iClient, const char[] szAuth) {
@@ -170,6 +174,7 @@ bool InitPlayerData(int iClient, const char[] szAuth) {
 	
 	iPlayerColor = iPlrClrBlue + iPlrClrGreen * 256 + iPlrClrRed * 256 * 256;
 	char szQueryColor[128];
+	// cant use incrementfield bc "data isn't initialized yet"
 	Format(szQueryColor, 128, "UPDATE player_stats SET color = %i WHERE steam_auth = '%s'", iPlayerColor, szAuth);
 	SQL_FastQuery(g_hSQL, szQueryColor);
 	
@@ -182,6 +187,9 @@ void IncrementField(int iClient, char[] szField, int iAdd = 1) {
 		return;
 		
 	if(!g_abInitializedClients[iClient])
+		return;
+		
+	if(GetConVarBool(FindConVar("sv_cheats")) && !GetConVarBool(g_cvarEnableWhenCheats))
 		return;
 	
 	char szQuery[200];
@@ -209,6 +217,9 @@ void IncrementField(int iClient, char[] szField, int iAdd = 1) {
 
 void ResetKillstreak(int iClient) {
 	if(!g_abInitializedClients[iClient])
+		return;
+	
+	if(GetConVarBool(FindConVar("sv_cheats")) && !GetConVarBool(g_cvarEnableWhenCheats))
 		return;
 	
 	char szQuery[256];
@@ -908,4 +919,51 @@ Action Command_ViewOfflineStats(int iClient, int iArgs) {
 Action Command_ViewTop(int iClient, int iArgs) {
 	PrintTopPlayers(iClient);
 	return Plugin_Handled;
+}
+
+void AddServerTagRat(char[] strTag) {
+	ConVar cvarTags = FindConVar("sv_tags");
+	char strServTags[128];
+	GetConVarString(cvarTags, strServTags, 128);
+	
+	int iServTagsLen = strlen(strServTags);
+	int iTagLen = strlen(strTag);
+	
+	bool bFoundTag = StrContains(strServTags, strTag, false) != -1;
+	if(bFoundTag) {
+		return;
+	}
+	
+	// not enough space in sv_tags for the tag
+	// +1 because of the comma needed for tag seperation
+	if(iServTagsLen + iTagLen+1 > 127) {
+		return;
+	}
+	
+	strServTags[iServTagsLen] = ',';
+	strcopy(strServTags[iServTagsLen + 1], 64, strTag);
+	
+	int iFlags = GetConVarFlags(cvarTags)
+	SetConVarFlags(cvarTags, iFlags & ~FCVAR_NOTIFY);
+	SetConVarString(cvarTags, strServTags, false, false);
+	SetConVarFlags(cvarTags, iFlags);
+}
+
+stock void RemoveServerTagRat(char[] strTag) {
+	ConVar cvarTags = FindConVar("sv_tags");
+	char strServTags[128];
+	GetConVarString(cvarTags, strServTags, 128);
+	
+	int iFoundTagAt = StrContains(strServTags, strTag, false);
+	if(iFoundTagAt == -1) {
+		return;
+	}
+	
+	ReplaceString(strServTags, 128, strTag, "", false);
+	ReplaceString(strServTags, 128, ",,", ",", false);
+	
+	int iFlags = GetConVarFlags(cvarTags)
+	SetConVarFlags(cvarTags, iFlags & ~FCVAR_NOTIFY);
+	SetConVarString(cvarTags, strServTags, false, false);
+	SetConVarFlags(cvarTags, iFlags);
 }
