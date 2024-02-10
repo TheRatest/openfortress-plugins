@@ -3,7 +3,7 @@
 
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 
-## Player Stats (1.04)
+## Player Stats (1.1)
 Keeps track of your stats!
 
 | ConVar                           | Description                                                                              | Default Value | Acceptable Values | Notes |
@@ -13,6 +13,7 @@ Keeps track of your stats!
 | sm_playerstats_hugtime           | Maximum amount of time that can pass when players killing each other is considered a hug | 1.25          | 0-5               |       |
 | smplayerstats_offlineplayerstats | Whether players can see offline players' stats using their SteamID2                      | 0             | 0 or 1            |       |
 | sm_playerstats_minheadshots      | How many headshots a player must have before they can be a headshotter in !top           | 10            | 0-1000            |       |
+| sm_playerstats_cheats            | Keep updating stats even if sv_cheats are enabled                                        | 0             | 0 or 1            |       |
 | sm_playerstats_debug             | Print most stat changes to the corresponding player                                      | 0             | 0 or 1            |       |
 
 #### Server commands:
@@ -30,9 +31,9 @@ sm_playerstats_erase "Delete all stats a player has without re-initializing new 
 #### Extra installation steps:
 Make a database entry in addons/sourcemod/config/databases.cfg called "player_stats"
 
-Associated server tag: None
+Associated server tag: "playerstats"
 
-## Killstreaks (1.33)
+## Killstreaks (1.4)
 Keep track of players' killstreaks and announce the highest killstreak each round
 
 | ConVar                                  | Description                                                                    | Default Value | Acceptable Values     | Notes                                 |
@@ -76,12 +77,15 @@ of_mapfraglimit_reload "Reload the 2nd config for this plugin" (Admin command)
 
 Associated server tag: "mapfraglimit"
 
-## Don't make the jumppads slow me down! (1.1)
-Modifies all of the jumppads to add to the player's velocity instead of resetting it
+## Jumppad Mod (1.4)
+Modifies jumppads without the need to recompile maps
 
-| ConVar              | Description                                                                          | Default Value | Acceptable Values | Notes |
-|---------------------|--------------------------------------------------------------------------------------|---------------|-------------------|-------|
-| of_jumppad_only_add | Modifies all of the jumppads to add to the player's velocity instead of resetting it | 1             | 0 or 1            |       |
+| ConVar                             | Description                                                                          | Default Value | Acceptable Values | Notes |
+|------------------------------------|--------------------------------------------------------------------------------------|---------------|-------------------|-------|
+| of_jumppad_only_add                | Modifies all of the jumppads to add to the player's velocity instead of resetting it | 1             | 0 or 1            |       |
+| of_jumppad_force_multiplier        |                                                                                      | 1             | (-10)-10          |       |
+| of_jumppad_force_multiplier_width  |                                                                                      | 1             | (-10)-10          |       |
+| of_jumppad_force_multiplier_height |                                                                                      | 1             | (-10)-10          |       |
 
 Associated server tag: none
 
