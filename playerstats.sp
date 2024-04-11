@@ -29,7 +29,7 @@ public Plugin myinfo = {
 	name = "Player Stats",
 	author = "ratest",
 	description = "Keeps track of your stats!",
-	version = "1.1",
+	version = "1.11",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -294,8 +294,11 @@ void Event_PlayerHurt(Event event, const char[] szEvName, bool bDontBroadcast) {
 	int iVictim = GetClientOfUserId(GetEventInt(event, "userid"));
 
 	int iDamageTaken = GetEventInt(event, "damageamount");
-	if(iDamageTaken > 500)
-		iDamageTaken = 500;
+	if(iDamageTaken > 400)
+		iDamageTaken = 400;
+
+	if(iDamageTaken < -400)
+		iDamageTaken = 400;
 
 	IncrementField(iVictim, "damage_taken", iDamageTaken);
 	
