@@ -30,7 +30,7 @@ public Plugin myinfo = {
 	name = "Player Stats",
 	author = "ratest",
 	description = "Keeps track of your stats!",
-	version = "1.2",
+	version = "1.21",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -51,6 +51,8 @@ public void OnPluginStart() {
 	RegAdminCmd("sm_playerstats_offlinestats", Command_ViewOfflineStats, ADMFLAG_CONVARS, "View an offline player's stats using their SteamID2");
 	RegAdminCmd("sm_playerstats_reset", Command_ResetStats, ADMFLAG_RCON, "Reset a player's stats (u evil thing)");
 	RegAdminCmd("sm_playerstats_erase", Command_EraseStats, ADMFLAG_RCON, "Delete all stats a player has without re-initializing new ones (also kicks the player)");
+	
+	AutoExecConfig(true, "playerstats");
 	
 	GetConVarString(g_cvarTableName, g_szTableName, 64);
 	g_cvarTableName.AddChangeHook(Event_TableNameChanged);
@@ -113,8 +115,6 @@ public void OnPluginStart() {
 	HookEvent("player_hurt", Event_PlayerHurt);
 	HookEvent("player_death", Event_PlayerDeath);
 	HookEvent("teamplay_win_panel", Event_RoundEnd);
-
-	AutoExecConfig(true, "playerstats");
 	
 	AddServerTagRat("playerstats");
 }
@@ -935,6 +935,41 @@ void Event_TableNameChanged(ConVar cvar, const char[] szOld, const char[] szNew)
 		return;
 		
 	GetConVarString(g_cvarTableName, g_szTableName, 64);
+	
+	char szCreateTableQuery[1024];
+	Format(szCreateTableQuery, 1024, "CREATE TABLE IF NOT EXISTS %s (\
+															steam_auth varchar(32) NOT NULL PRIMARY KEY,\
+															name varchar(128),\
+															color int,\
+															frags int,\
+															deaths int,\
+															kdr float,\
+															powerup_kills int,\
+															melee_kills int,\
+															headshots int,\
+															rg_headshots int,\
+															rg_bodyshots int,\
+															rg_headshotrate float,\
+															rl_airshots int,\
+															matches int,\
+															wins int,\
+															top3_wins int,\
+															join_count int,\
+															highest_killstreak smallint,\
+															highest_killstreak_map varchar(128),\
+															damage_dealt bigint,\
+															damage_taken bigint,\
+															hugs int,\
+															ssg_meatshots int,\
+															ssg_normalshots int,\
+															ssg_misses int,\
+															gl_airshots int,\
+															rg_misses int,\
+															suicides int\
+															) ENGINE=InnoDB DEFAULT CHARSET=utf8;", g_szTableName)
+	if(!SQL_FastQuery(g_hSQL, szCreateTableQuery)) {
+		LogError("<!> Couldnt create %s table!", g_szTableName);
+	}
 }
 
 void AddServerTagRat(char[] strTag) {

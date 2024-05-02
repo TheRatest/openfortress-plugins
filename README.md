@@ -3,7 +3,7 @@
 
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 
-## Player Stats (1.2)
+## Player Stats (1.21)
 Keeps track of your stats!
 
 | ConVar                           | Description                                                                              | Default Value | Acceptable Values | Notes |
