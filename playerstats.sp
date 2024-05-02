@@ -13,12 +13,13 @@ ConVar g_cvarDebugLog = null;
 ConVar g_cvarOfflinePlayerStats = null;
 ConVar g_cvarMinHeadshotsQualify = null;
 ConVar g_cvarEnableWhenCheats = null;
+ConVar g_cvarTableName = null;
+
+char g_szTableName[64];
 
 bool g_abInitializedClients[MAXPLAYERS];
 int g_aiKillstreaks[MAXPLAYERS];
 char g_aszStoredAuth[MAXPLAYERS][32];
-// someone may manipulate b_IsTopThree i guess? i hope no one finds out that im allocating a whole 8 extra bytes of memory!!
-int g_aiTopThree[5];
 
 bool g_abHuggable[MAXPLAYERS];
 int g_aiHugger[MAXPLAYERS];
@@ -29,7 +30,7 @@ public Plugin myinfo = {
 	name = "Player Stats",
 	author = "ratest",
 	description = "Keeps track of your stats!",
-	version = "1.11",
+	version = "1.2",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -42,6 +43,7 @@ public void OnPluginStart() {
 	g_cvarOfflinePlayerStats = CreateConVar("sm_playerstats_offlineplayerstats", "0", "Whether players can see offline players' stats using their SteamID2", 0, true, 0.0, true, 1.0);
 	g_cvarMinHeadshotsQualify = CreateConVar("sm_playerstats_minheadshots", "10", "How many headshots a player must have before they can be a headshotter in !top", 0, true, 0.0, true, 1000.0);
 	g_cvarEnableWhenCheats = CreateConVar("sm_playerstats_cheats", "0", "Keep updating stats even if sv_cheats are enabled", 0, true, 0.0, true, 1.0);
+	g_cvarTableName = CreateConVar("sm_playerstats_table", "player_stats", "The DB table name", 0, true, 0.0, true, 1.0);
 	g_cvarDebugLog = CreateConVar("sm_playerstats_debug", "0", "Print most stat changes to the corresponding player", 0, true, 0.0, true, 1.0);
 	
 	RegConsoleCmd("sm_playerstats_stats", Command_ViewStats, "View your stats (or someone else's)");
@@ -50,47 +52,48 @@ public void OnPluginStart() {
 	RegAdminCmd("sm_playerstats_reset", Command_ResetStats, ADMFLAG_RCON, "Reset a player's stats (u evil thing)");
 	RegAdminCmd("sm_playerstats_erase", Command_EraseStats, ADMFLAG_RCON, "Delete all stats a player has without re-initializing new ones (also kicks the player)");
 	
+	GetConVarString(g_cvarTableName, g_szTableName, 64);
+	g_cvarTableName.AddChangeHook(Event_TableNameChanged);
+	
 	char szErr[256];
 	g_hSQL = SQL_Connect("player_stats", true, szErr, 256);
 	if(!g_hSQL) {
 		LogError("<!> Couldn't connect to the \"player_stats\" database! Please set up the database in addons/sourcemod/configs/databases.cfg before using this plugin.");
 	} else {
-		if(SQL_FastQuery(g_hSQL, "IF OBJECT_ID('player_stats') IS NOT NULL BEGIN RETURN TRUE END ELSE BEGIN RETURN FALSE END")) {
-			PrintToServer("Table exists");
-		} else {
-			SQL_SetCharset(g_hSQL, "utf8mb4");
-			if(!SQL_FastQuery(g_hSQL, "CREATE TABLE IF NOT EXISTS player_stats (\
-																	steam_auth varchar(32) NOT NULL PRIMARY KEY,\
-																	name varchar(128),\
-																	color int,\
-																	frags int,\
-																	deaths int,\
-																	kdr float,\
-																	powerup_kills int,\
-																	melee_kills int,\
-																	headshots int,\
-																	rg_headshots int,\
-																	rg_bodyshots int,\
-																	rg_headshotrate float,\
-																	rl_airshots int,\
-																	matches int,\
-																	wins int,\
-																	top3_wins int,\
-																	join_count int,\
-																	highest_killstreak smallint,\
-																	highest_killstreak_map varchar(128),\
-																	damage_dealt bigint,\
-																	damage_taken bigint,\
-																	hugs int,\
-																	ssg_meatshots int,\
-																	ssg_normalshots int,\
-																	ssg_misses int,\
-																	gl_airshots int,\
-																	rg_misses int,\
-																	suicides int\
-																	) ENGINE=InnoDB DEFAULT CHARSET=utf8;")) {
-				LogError("<!> Couldnt create player_stats table!");
-			}
+		SQL_SetCharset(g_hSQL, "utf8mb4");
+		char szCreateTableQuery[1024];
+		Format(szCreateTableQuery, 1024, "CREATE TABLE IF NOT EXISTS %s (\
+																steam_auth varchar(32) NOT NULL PRIMARY KEY,\
+																name varchar(128),\
+																color int,\
+																frags int,\
+																deaths int,\
+																kdr float,\
+																powerup_kills int,\
+																melee_kills int,\
+																headshots int,\
+																rg_headshots int,\
+																rg_bodyshots int,\
+																rg_headshotrate float,\
+																rl_airshots int,\
+																matches int,\
+																wins int,\
+																top3_wins int,\
+																join_count int,\
+																highest_killstreak smallint,\
+																highest_killstreak_map varchar(128),\
+																damage_dealt bigint,\
+																damage_taken bigint,\
+																hugs int,\
+																ssg_meatshots int,\
+																ssg_normalshots int,\
+																ssg_misses int,\
+																gl_airshots int,\
+																rg_misses int,\
+																suicides int\
+																) ENGINE=InnoDB DEFAULT CHARSET=utf8;", g_szTableName)
+		if(!SQL_FastQuery(g_hSQL, szCreateTableQuery)) {
+			LogError("<!> Couldnt create %s table!", g_szTableName);
 		}
 	}
 
@@ -109,7 +112,7 @@ public void OnPluginStart() {
 	
 	HookEvent("player_hurt", Event_PlayerHurt);
 	HookEvent("player_death", Event_PlayerDeath);
-	HookEvent("teamplay_round_win", Event_RoundEnd);
+	HookEvent("teamplay_win_panel", Event_RoundEnd);
 
 	AutoExecConfig(true, "playerstats");
 	
@@ -133,10 +136,22 @@ bool InitPlayerData(int iClient, const char[] szAuth) {
 	ReplaceString(szClientName, 128, "'", "''", false);
 	
 	char szQuery1[512];
-	Format(szQuery1, 512, "SELECT steam_auth FROM player_stats WHERE steam_auth = '%s'", szAuth);
+	Format(szQuery1, 512, "SELECT steam_auth FROM %s WHERE steam_auth = '%s'", g_szTableName, szAuth);
 	char szQuery2[512];
-	Format(szQuery2, 512, "INSERT INTO player_stats VALUES (\"%s\", \"%s\", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \"None\", 0, 0, 0, 0, 0, 0, 0, 0, 0);", szAuth, szClientName);
+	Format(szQuery2, 512, "INSERT INTO %s VALUES (\"%s\", \"%s\", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \"None\", 0, 0, 0, 0, 0, 0, 0, 0, 0);", g_szTableName, szAuth, szClientName);
 	DBResultSet hResults = SQL_Query(g_hSQL, szQuery1);
+	
+	if(hResults == INVALID_HANDLE) {
+		char szErr[256];
+		SQL_GetError(g_hSQL, szErr, 256);
+		LogError("<!> Failed to init player data, invalid handle: %s", szErr);
+		CloseHandle(g_hSQL);
+		g_hSQL = SQL_Connect("player_stats", true, szErr, 256);
+		if(g_hSQL == INVALID_HANDLE) {
+			LogError("<!> Couldn't connect to the \"player_stats\" database! Please set up the database in addons/sourcemod/configs/databases.cfg before using this plugin.");
+		}
+		hResults = SQL_Query(g_hSQL, szQuery1);
+	}
 	
 	if(hResults.RowCount == 0) {
 		if (!SQL_FastQuery(g_hSQL, szQuery2)) {
@@ -175,7 +190,7 @@ bool InitPlayerData(int iClient, const char[] szAuth) {
 	iPlayerColor = iPlrClrBlue + iPlrClrGreen * 256 + iPlrClrRed * 256 * 256;
 	char szQueryColor[128];
 	// cant use incrementfield bc "data isn't initialized yet"
-	Format(szQueryColor, 128, "UPDATE player_stats SET color = %i WHERE steam_auth = '%s'", iPlayerColor, szAuth);
+	Format(szQueryColor, 128, "UPDATE %s SET color = %i WHERE steam_auth = '%s'", g_szTableName, iPlayerColor, szAuth);
 	SQL_FastQuery(g_hSQL, szQueryColor);
 	
 	CloseHandle(hResults);
@@ -193,7 +208,7 @@ void IncrementField(int iClient, char[] szField, int iAdd = 1) {
 		return;
 	
 	char szQuery[200];
-	Format(szQuery, 200, "UPDATE player_stats SET %s = %s + %i WHERE steam_auth = '%s'", szField, szField, iAdd, g_aszStoredAuth[iClient]);
+	Format(szQuery, 200, "UPDATE %s SET %s = %s + %i WHERE steam_auth = '%s'", g_szTableName, szField, szField, iAdd, g_aszStoredAuth[iClient]);
 	if(IsClientInGame(iClient) && GetConVarBool(g_cvarDebugLog))
 		PrintToChat(iClient, "%s += %i", szField, iAdd);
 	if (!SQL_FastQuery(g_hSQL, szQuery)) {
@@ -204,12 +219,12 @@ void IncrementField(int iClient, char[] szField, int iAdd = 1) {
 	} else {
 		if(StrEqual(szField, "rg_headshots", false) || StrEqual(szField, "rg_bodyshots", false) || StrEqual(szField, "rg_misses", false)) {
 			char szRateUpdateQuery[256];
-			Format(szRateUpdateQuery, 256, "UPDATE player_stats SET rg_headshotrate = rg_headshots / (rg_headshots + rg_bodyshots + rg_misses) WHERE steam_auth = '%s'", g_aszStoredAuth[iClient]);
+			Format(szRateUpdateQuery, 256, "UPDATE %s SET rg_headshotrate = rg_headshots / (rg_headshots + rg_bodyshots + rg_misses) WHERE steam_auth = '%s'", g_szTableName, g_aszStoredAuth[iClient]);
 			SQL_FastQuery(g_hSQL, szRateUpdateQuery);
 		}
 		if(StrEqual(szField, "deaths", false) || StrEqual(szField, "frags", false)) {
 			char szRateUpdateQuery[256];
-			Format(szRateUpdateQuery, 256, "UPDATE player_stats SET kdr = frags / deaths WHERE steam_auth = '%s'", g_aszStoredAuth[iClient]);
+			Format(szRateUpdateQuery, 256, "UPDATE %s SET kdr = frags / deaths WHERE steam_auth = '%s'", g_szTableName, g_aszStoredAuth[iClient]);
 			SQL_FastQuery(g_hSQL, szRateUpdateQuery);
 		}
 	}
@@ -223,7 +238,7 @@ void ResetKillstreak(int iClient) {
 		return;
 	
 	char szQuery[256];
-	Format(szQuery, 256, "SELECT highest_killstreak FROM player_stats WHERE steam_auth = '%s'", g_aszStoredAuth[iClient]);
+	Format(szQuery, 256, "SELECT highest_killstreak FROM %s WHERE steam_auth = '%s'", g_szTableName, g_aszStoredAuth[iClient]);
 	DBResultSet hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults == INVALID_HANDLE) {
 		char szErr[256];
@@ -242,7 +257,7 @@ void ResetKillstreak(int iClient) {
 		char szQueryUpdate[256];
 		char szMap[128];
 		GetCurrentMap(szMap, 128);
-		Format(szQueryUpdate, 256, "UPDATE player_stats SET highest_killstreak = %i, highest_killstreak_map = \"%s\" WHERE steam_auth = '%s'", g_aiKillstreaks[iClient], szMap, g_aszStoredAuth[iClient]);
+		Format(szQueryUpdate, 256, "UPDATE %s SET highest_killstreak = %i, highest_killstreak_map = \"%s\" WHERE steam_auth = '%s'", g_szTableName, g_aiKillstreaks[iClient], szMap, g_aszStoredAuth[iClient]);
 		if(!SQL_FastQuery(g_hSQL, szQueryUpdate)) {
 			char szErr[256];
 			SQL_GetError(g_hSQL, szErr, 256);
@@ -294,11 +309,8 @@ void Event_PlayerHurt(Event event, const char[] szEvName, bool bDontBroadcast) {
 	int iVictim = GetClientOfUserId(GetEventInt(event, "userid"));
 
 	int iDamageTaken = GetEventInt(event, "damageamount");
-	if(iDamageTaken > 400)
-		iDamageTaken = 400;
-
-	if(iDamageTaken < -400)
-		iDamageTaken = 400;
+	if(iDamageTaken > 500)
+		iDamageTaken = 500;
 
 	IncrementField(iVictim, "damage_taken", iDamageTaken);
 	
@@ -443,13 +455,12 @@ Action Event_RocketTouch(int iEntity, int iOther) {
 	return Plugin_Continue;
 }
 
-int GetPlayerFrags(int iClient) {
+stock int GetPlayerFrags(int iClient) {
 	int iFrags = GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iScore", 4, iClient);
 	return iFrags;
 }
 
 void Event_RoundEnd(Event event, const char[] szEventName, bool bDontBroadcast) {
-	int iTopThreeCounter = 0;
 	for(int i = 1; i < MaxClients; ++i) {
 		if(!IsClientInGame(i))
 			continue;
@@ -459,23 +470,16 @@ void Event_RoundEnd(Event event, const char[] szEventName, bool bDontBroadcast) 
 			
 		IncrementField(i, "matches");
 		ResetKillstreak(i);
-		
-		bool bIsTopThree = LoadFromAddress(GetEntityAddress(i) + view_as<Address>(FindSendPropInfo("CTFPlayer", "m_bIsTopThree")), NumberType_Int8) & 255;
-		
-		if(bIsTopThree) {
-			IncrementField(i, "top3_wins");
-			g_aiTopThree[iTopThreeCounter] = i;
-			++iTopThreeCounter;
-		}
 	}
 	
-	int iTopOneClient = g_aiTopThree[0];
-	for(int i = 0; i < iTopThreeCounter; ++i) {
-		if(GetPlayerFrags(g_aiTopThree[i]) > GetPlayerFrags(iTopOneClient))
-			iTopOneClient = g_aiTopThree[i];
-	}
+	int iTop1Client = GetEventInt(event, "player_1");
+	int iTop2Client = GetEventInt(event, "player_2");
+	int iTop3Client = GetEventInt(event, "player_3");
 	
-	IncrementField(iTopOneClient, "wins");
+	IncrementField(iTop1Client, "top3_wins");
+	IncrementField(iTop2Client, "top3_wins");
+	IncrementField(iTop3Client, "top3_wins");
+	IncrementField(iTop1Client, "wins");
 }
 
 void PrintPlayerStats(int iClient, int iStatsOwner, char[] szAuthArg = "") {
@@ -499,7 +503,7 @@ void PrintPlayerStats(int iClient, int iStatsOwner, char[] szAuthArg = "") {
 	}
 
 	char szQuery[256];
-	Format(szQuery, 256, "SELECT * FROM player_stats WHERE steam_auth = '%s'", szAuthToUse);
+	Format(szQuery, 256, "SELECT * FROM %s WHERE steam_auth = '%s'", g_szTableName, szAuthToUse);
 	DBResultSet hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults.RowCount < 1) {
 		ReplyToCommand(iClient, "[PlayerStats] No target found!");
@@ -594,7 +598,7 @@ void PrintTopPlayers(int iClient) {
 	char szBestFraggerColor[12];
 	int iMostFrags = 0;
 	
-	Format(szQuery, 256, "SELECT * FROM player_stats WHERE (frags = (SELECT MAX(frags) FROM player_stats))");
+	Format(szQuery, 256, "SELECT * FROM %s WHERE (frags = (SELECT MAX(frags) FROM %s))", g_szTableName, g_szTableName);
 	hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults == INVALID_HANDLE) {
 		char szErr[256];
@@ -611,7 +615,7 @@ void PrintTopPlayers(int iClient) {
 	char szBestPlayerColor[12];
 	int iMostWins = 0;
 	
-	Format(szQuery, 256, "SELECT * FROM player_stats WHERE (wins = (SELECT MAX(wins) FROM player_stats))");
+	Format(szQuery, 256, "SELECT * FROM %s WHERE (wins = (SELECT MAX(wins) FROM %s))", g_szTableName, g_szTableName);
 	hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults == INVALID_HANDLE) {
 		char szErr[256];
@@ -629,7 +633,7 @@ void PrintTopPlayers(int iClient) {
 	char szBestHeadshotterColor[12];
 	float flBestHSRate = 0.0;
 	
-	Format(szQuery, 256, "SELECT * FROM player_stats WHERE (rg_headshotrate = (SELECT MAX(rg_headshotrate) FROM player_stats WHERE rg_headshots > %i))", GetConVarInt(g_cvarMinHeadshotsQualify));
+	Format(szQuery, 256, "SELECT * FROM %s WHERE (rg_headshotrate = (SELECT MAX(rg_headshotrate) FROM %s WHERE rg_headshots > %i))", g_szTableName, g_szTableName, GetConVarInt(g_cvarMinHeadshotsQualify));
 	hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults == INVALID_HANDLE) {
 		char szErr[256];
@@ -637,7 +641,7 @@ void PrintTopPlayers(int iClient) {
 		LogError("<!> PrintTopPlayers 2nd query failed, %s", szErr);
 	}
 	if(hResults.RowCount < 1) {
-		Format(szQuery, 256, "SELECT * FROM player_stats WHERE (rg_headshotrate = (SELECT MAX(rg_headshotrate) FROM player_stats))");
+		Format(szQuery, 256, "SELECT * FROM %s WHERE (rg_headshotrate = (SELECT MAX(rg_headshotrate) FROM %s))", g_szTableName, g_szTableName);
 		hResults = SQL_Query(g_hSQL, szQuery);
 		if(hResults == INVALID_HANDLE) {
 			char szErr[256];
@@ -659,7 +663,7 @@ void PrintTopPlayers(int iClient) {
 	char szBestKillstreakerMap[128];
 	int iBestKillstreak = 0;
 	
-	Format(szQuery, 256, "SELECT * FROM player_stats WHERE (highest_killstreak = (SELECT MAX(highest_killstreak) FROM player_stats))");
+	Format(szQuery, 256, "SELECT * FROM %s WHERE (highest_killstreak = (SELECT MAX(highest_killstreak) FROM %s))", g_szTableName, g_szTableName);
 	hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults == INVALID_HANDLE) {
 		char szErr[256];
@@ -680,7 +684,7 @@ void PrintTopPlayers(int iClient) {
 	int iSSGMisses = 0;
 	int iSSGTotalShots = 0;
 	
-	Format(szQuery, 256, "SELECT * FROM player_stats WHERE (ssg_meatshots = (SELECT MAX(ssg_meatshots) FROM player_stats))");
+	Format(szQuery, 256, "SELECT * FROM %s WHERE (ssg_meatshots = (SELECT MAX(ssg_meatshots) FROM %s))", g_szTableName, g_szTableName);
 	hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults == INVALID_HANDLE) {
 		char szErr[256];
@@ -705,7 +709,7 @@ void PrintTopPlayers(int iClient) {
 	char szBestDamagerColor[12];
 	int iMostDamage = 0;
 	
-	Format(szQuery, 256, "SELECT * FROM player_stats WHERE (damage_dealt = (SELECT MAX(damage_dealt) FROM player_stats))");
+	Format(szQuery, 256, "SELECT * FROM %s WHERE (damage_dealt = (SELECT MAX(damage_dealt) FROM %s))", g_szTableName, g_szTableName);
 	hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults == INVALID_HANDLE) {
 		char szErr[256];
@@ -722,7 +726,7 @@ void PrintTopPlayers(int iClient) {
 	char szBestHuggerColor[12];
 	int iMostHugs = 0;
 	
-	Format(szQuery, 256, "SELECT * FROM player_stats WHERE (hugs = (SELECT MAX(hugs) FROM player_stats))");
+	Format(szQuery, 256, "SELECT * FROM %s WHERE (hugs = (SELECT MAX(hugs) FROM %s))", g_szTableName, g_szTableName);
 	hResults = SQL_Query(g_hSQL, szQuery);
 	if(hResults == INVALID_HANDLE) {
 		char szErr[256];
@@ -801,14 +805,15 @@ public Action OnClientSayCommand(int iClient, const char[] szCommand, const char
 Action Command_ResetStats(int iClient, int iArgs) {
 	if(iArgs < 1 || iArgs > 1) {
 		ReplyToCommand(iClient, "Usage: sm_playerstats_reset <player name>");
+		return Plugin_Handled;
 	}
 	
 	char szTargetName[128];
 	GetCmdArg(1, szTargetName, 128)
 	int aiTargets[2];
 	char szTarget[128];
-	bool bIsMLPhrase;
-	int iTargetsFound = ProcessTargetString(szTargetName, 1, aiTargets, 2, 0, szTarget, 128, bIsMLPhrase);
+	bool bIsMLPhrase = false;
+	int iTargetsFound = ProcessTargetString(szTargetName, 0, aiTargets, 1, 0, szTarget, 128, bIsMLPhrase);
 	
 	if(iTargetsFound > 0) {
 		char szClientName[128];
@@ -820,7 +825,7 @@ Action Command_ResetStats(int iClient, int iArgs) {
 			return Plugin_Handled;
 		}
 		char szQuery[256];
-		Format(szQuery, 256, "DELETE FROM player_stats WHERE steam_auth = '%s';", szAuth);
+		Format(szQuery, 256, "DELETE FROM %s WHERE steam_auth = '%s';", g_szTableName, szAuth);
 		SQL_FastQuery(g_hSQL, szQuery);
 		g_abInitializedClients[aiTargets[0]] = InitPlayerData(aiTargets[0], szAuth);
 		CPrintToChat(aiTargets[0], "%t %t", "Rat CommandPrefix", "Rat StatsResetByAdmin");
@@ -835,14 +840,15 @@ Action Command_ResetStats(int iClient, int iArgs) {
 Action Command_EraseStats(int iClient, int iArgs) {
 	if(iArgs < 1 || iArgs > 1) {
 		ReplyToCommand(iClient, "Usage: sm_playerstats_erase <player name>");
+		return Plugin_Handled;
 	}
 	
 	char szTargetName[128];
 	GetCmdArg(1, szTargetName, 128)
 	int aiTargets[2];
 	char szTarget[128];
-	bool bIsMLPhrase;
-	int iTargetsFound = ProcessTargetString(szTargetName, 1, aiTargets, 2, 0, szTarget, 128, bIsMLPhrase);
+	bool bIsMLPhrase = false;
+	int iTargetsFound = ProcessTargetString(szTargetName, 0, aiTargets, 1, 0, szTarget, 128, bIsMLPhrase);
 	
 	if(iTargetsFound > 0) {
 		char szClientName[128];
@@ -854,7 +860,7 @@ Action Command_EraseStats(int iClient, int iArgs) {
 			return Plugin_Handled;
 		}
 		char szQuery[256];
-		Format(szQuery, 256, "DELETE FROM player_stats WHERE steam_auth = '%s';", szAuth);
+		Format(szQuery, 256, "DELETE FROM %s WHERE steam_auth = '%s';", g_szTableName, szAuth);
 		SQL_FastQuery(g_hSQL, szQuery);
 		KickClient(aiTargets[0], "Your stats have been erased by an admin");
 		ReplyToCommand(iClient, "[PlayerStats] Successfully erased %s's stats", szClientName);
@@ -922,6 +928,13 @@ Action Command_ViewOfflineStats(int iClient, int iArgs) {
 Action Command_ViewTop(int iClient, int iArgs) {
 	PrintTopPlayers(iClient);
 	return Plugin_Handled;
+}
+
+void Event_TableNameChanged(ConVar cvar, const char[] szOld, const char[] szNew) {
+	if(StrEqual(szOld, szNew, false))
+		return;
+		
+	GetConVarString(g_cvarTableName, g_szTableName, 64);
 }
 
 void AddServerTagRat(char[] strTag) {
