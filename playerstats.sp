@@ -30,7 +30,7 @@ public Plugin myinfo = {
 	name = "Player Stats",
 	author = "ratest",
 	description = "Keeps track of your stats!",
-	version = "1.21",
+	version = "1.21a",
 	url = "https://github.com/TheRatest/openfortress-plugins"
 };
 
@@ -43,7 +43,7 @@ public void OnPluginStart() {
 	g_cvarOfflinePlayerStats = CreateConVar("sm_playerstats_offlineplayerstats", "0", "Whether players can see offline players' stats using their SteamID2", 0, true, 0.0, true, 1.0);
 	g_cvarMinHeadshotsQualify = CreateConVar("sm_playerstats_minheadshots", "10", "How many headshots a player must have before they can be a headshotter in !top", 0, true, 0.0, true, 1000.0);
 	g_cvarEnableWhenCheats = CreateConVar("sm_playerstats_cheats", "0", "Keep updating stats even if sv_cheats are enabled", 0, true, 0.0, true, 1.0);
-	g_cvarTableName = CreateConVar("sm_playerstats_table", "player_stats", "The DB table name", 0, true, 0.0, true, 1.0);
+	g_cvarTableName = CreateConVar("sm_playerstats_table", "player_stats", "The DB table name");
 	g_cvarDebugLog = CreateConVar("sm_playerstats_debug", "0", "Print most stat changes to the corresponding player", 0, true, 0.0, true, 1.0);
 	
 	RegConsoleCmd("sm_playerstats_stats", Command_ViewStats, "View your stats (or someone else's)");
