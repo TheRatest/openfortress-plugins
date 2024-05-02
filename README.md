@@ -3,11 +3,12 @@
 
 A collection of SourceMod plugins i made for Open Fortress dedicated servers (https://openfortress.fun)
 
-## Player Stats (1.1)
+## Player Stats (1.2)
 Keeps track of your stats!
 
 | ConVar                           | Description                                                                              | Default Value | Acceptable Values | Notes |
 |----------------------------------|------------------------------------------------------------------------------------------|---------------|-------------------|-------|
+| sm_playerstats_table             | The table to use                                                                         | "player_stats"| any ascii string  |       |
 | sm_playerstats_hugs              | Keep track of hugs (when players kill each other within a short timespan)                | 0             | 0 or 1            |       |
 | sm_playerstats_hugs_top          | Show the best hugger in !top (must have hugs enabled beforehand for this to apply)       | 1             | 0 or 1            |       |
 | sm_playerstats_hugtime           | Maximum amount of time that can pass when players killing each other is considered a hug | 1.25          | 0-5               |       |
@@ -33,7 +34,7 @@ Make a database entry in addons/sourcemod/config/databases.cfg called "player_st
 
 Associated server tag: "playerstats"
 
-## Killstreaks (1.4)
+## Killstreaks (1.41)
 Keep track of players' killstreaks and announce the highest killstreak each round
 
 | ConVar                                  | Description                                                                    | Default Value | Acceptable Values     | Notes                                 |
